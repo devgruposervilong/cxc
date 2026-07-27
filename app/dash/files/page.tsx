@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import * as XLSX from "xlsx";
+import { rankearClientes } from "@/lib/clientes";
+import type { Documento } from "@/lib/clientes";
 
 // Nombres fijos de columnas, en el orden exacto del archivo fuente
 const COLUMN_NAMES = [
@@ -42,22 +44,23 @@ const VENDEDORES = {
 // del año bisiesto de 1900 incluido). 25569 = días entre esa fecha y el
 // epoch de JS (1970-01-01). Se usa el instante UTC del serial y se lee
 // con getUTC*, así el día no se corre por la zona horaria local.
-function excelSerialToDate(value: unknown): string | null {
+function excelSerialADate(value: unknown): Date | null {
   if (value === null || value === undefined || value === "") return null;
 
-  let date: Date | null = null;
+  if (value instanceof Date) return value;
 
-  if (value instanceof Date) {
-    date = value;
-  } else if (typeof value === "number") {
+  if (typeof value === "number") {
     const utcDays = Math.floor(value - 25569);
     const utcMs = utcDays * 86400 * 1000;
-    date = new Date(utcMs);
-  } else {
-    const parsed = new Date(String(value));
-    date = isNaN(parsed.getTime()) ? null : parsed;
+    return new Date(utcMs);
   }
 
+  const parsed = new Date(String(value));
+  return isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function excelSerialToDate(value: unknown): string | null {
+  const date = excelSerialADate(value);
   if (!date) return null;
 
   const dia = String(date.getUTCDate()).padStart(2, "0");
@@ -89,12 +92,25 @@ function truncar2(value: unknown): number | null {
 // - formatea EMISION y VENCIMIENTO como string dd/mm/aaaa
 // - extrae RIF_CLIENTE desde OBSERVACION (antes de descartarla)
 // - deja TOTAL con solo 2 decimales (truncado, sin redondear)
-function limpiarDocumento(row: Record<string, unknown>) {
+// - calcula MOROSIDAD (días entre hoy y VENCIMIENTO); si no es FACT/Factura → 0
+function limpiarDocumento(row: Record<string, unknown>, hoy: Date) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { MONEDA, TASA_1, TASA_2, VACIO_1, VACIO_2, SALDO, OBSERVACION, ...rest } = row;
 
   const codVendedor = String(rest.COD_VENDEDOR ?? "").trim();
   const vendedor = VENDEDORES[codVendedor as keyof typeof VENDEDORES] ?? null;
+
+  const tipo = String(rest.TIPO ?? "").trim();
+  const esDocumento = tipo === "FACT" || tipo === "Factura";
+
+  let morosidad = 0;
+  if (esDocumento) {
+    const vencimiento = excelSerialADate(rest.VENCIMIENTO);
+    if (vencimiento) {
+      const diffMs = hoy.getTime() - vencimiento.getTime();
+      morosidad = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    }
+  }
 
   return {
     ...rest,
@@ -103,6 +119,8 @@ function limpiarDocumento(row: Record<string, unknown>) {
     VENDEDOR: vendedor,
     RIF_CLIENTE: extraerRif(OBSERVACION),
     TOTAL: truncar2(rest.TOTAL),
+    MOROSIDAD: morosidad,
+    CLIENTE: null,
   };
 }
 
@@ -139,12 +157,55 @@ export default function FilesPage() {
       (row) => !IGNORED_TIPOS.includes(row.TIPO as string)
     );
 
-    const facturasLimpias = facturas.map(limpiarDocumento);
-    const notasCreditoLimpias = notasCredito.map(limpiarDocumento);
+    const hoy = new Date();
+    const facturasLimpias = facturas.map((row) => limpiarDocumento(row, hoy)) as Documento[];
+    const notasCreditoLimpias = notasCredito.map((row) => limpiarDocumento(row, hoy)) as Documento[];
 
-    console.log("Facturas:", facturasLimpias);
-    console.log("Notas de crédito:", notasCreditoLimpias);
-    console.log("Clientes:", clientes);
+    // Set 3: mapear TIPO → RIF y NUMERO → CLIENTE (nombre)
+    const mapaJoin = new Map<string, string>(); // join key (RIF sin 1er char) → nombre cliente
+    for (const row of clientes) {
+      const rif = String(row.TIPO ?? "").trim();
+      const nombre = String(row.NUMERO ?? "").trim();
+      if (rif && nombre) {
+        mapaJoin.set(rif.slice(1), nombre);
+      }
+    }
+
+    // Asignar CLIENTE a cada documento mediante join
+    function asignarCliente(doc: Documento): Documento {
+      const rif = doc.RIF_CLIENTE ?? "";
+      const joinKey = rif.slice(1);
+      return { ...doc, CLIENTE: mapaJoin.get(joinKey) ?? null };
+    }
+
+    const facturasConCliente = facturasLimpias.map(asignarCliente);
+    const notasCreditoConCliente = notasCreditoLimpias.map(asignarCliente);
+
+    const todosDocumentos = [...facturasConCliente, ...notasCreditoConCliente];
+    const clientesRankeados = rankearClientes(todosDocumentos);
+
+    console.log("=== CLIENTES RANKEADOS ===");
+    console.table(clientesRankeados.map((c) => ({
+      CLIENTE: c.nombre,
+      MOROSIDAD: c.morosidadMax,
+      TOTAL: c.totalGeneral.toFixed(2),
+      DOCS: c.documentos.length,
+    })));
+    console.log("Detalle por cliente:");
+    for (const c of clientesRankeados) {
+      console.group(c.nombre);
+      console.table(c.documentos.map((d) => ({
+        TIPO: d.TIPO,
+        NUMERO: d.NUMERO,
+        EMISION: d.EMISION,
+        VENCIMIENTO: d.VENCIMIENTO,
+        MOROSIDAD: d.MOROSIDAD,
+        VENDEDOR: d.VENDEDOR,
+        TOTAL: d.TOTAL?.toFixed(2),
+      })));
+      console.log(`Total ${c.nombre}: $${c.totalGeneral.toFixed(2)}`);
+      console.groupEnd();
+    }
   };
 
   return (
