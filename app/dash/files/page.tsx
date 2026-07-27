@@ -3,7 +3,7 @@
 import { useState } from "react";
 import * as XLSX from "xlsx";
 import { rankearClientes } from "@/lib/clientes";
-import type { Documento } from "@/lib/clientes";
+import type { ClienteRankeado, Documento } from "@/lib/clientes";
 
 // Nombres fijos de columnas, en el orden exacto del archivo fuente
 const COLUMN_NAMES = [
@@ -126,33 +126,27 @@ function limpiarDocumento(row: Record<string, unknown>, hoy: Date) {
 
 export default function FilesPage() {
   const [fileName, setFileName] = useState<string | null>(null);
+  const [clientesRankeados, setClientesRankeados] = useState<ClienteRankeado[] | null>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setFileName(file.name);
+    setClientesRankeados(null);
 
     const buffer = await file.arrayBuffer();
 
-    // xlsx soporta tanto .xls (BIFF8) como .xlsx sin configuración extra
     const workbook = XLSX.read(buffer, { type: "array" });
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-    // header: nuestro array de nombres -> se asignan como keys directamente
-    // range: 1 -> saltamos la fila 0 (el header original del archivo)
     const data = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, {
       header: COLUMN_NAMES,
       range: 1,
       defval: null,
     });
 
-    // Set 1: solo facturas
     const facturas = data.filter((row) => row.TIPO === "FACT");
-
-    // Set 2: solo notas de crédito
     const notasCredito = data.filter((row) => row.TIPO === "N/CR");
-
-    // Set 3: todo lo que no sea documento válido ni texto de formato/relleno del reporte
     const clientes = data.filter(
       (row) => !IGNORED_TIPOS.includes(row.TIPO as string)
     );
@@ -161,8 +155,7 @@ export default function FilesPage() {
     const facturasLimpias = facturas.map((row) => limpiarDocumento(row, hoy)) as Documento[];
     const notasCreditoLimpias = notasCredito.map((row) => limpiarDocumento(row, hoy)) as Documento[];
 
-    // Set 3: mapear TIPO → RIF y NUMERO → CLIENTE (nombre)
-    const mapaJoin = new Map<string, string>(); // join key (RIF sin 1er char) → nombre cliente
+    const mapaJoin = new Map<string, string>();
     for (const row of clientes) {
       const rif = String(row.TIPO ?? "").trim();
       const nombre = String(row.NUMERO ?? "").trim();
@@ -171,7 +164,6 @@ export default function FilesPage() {
       }
     }
 
-    // Asignar CLIENTE a cada documento mediante join
     function asignarCliente(doc: Documento): Documento {
       const rif = doc.RIF_CLIENTE ?? "";
       const joinKey = rif.slice(1);
@@ -182,56 +174,87 @@ export default function FilesPage() {
     const notasCreditoConCliente = notasCreditoLimpias.map(asignarCliente);
 
     const todosDocumentos = [...facturasConCliente, ...notasCreditoConCliente];
-    const clientesRankeados = rankearClientes(todosDocumentos);
-
-    console.log("=== CLIENTES RANKEADOS ===");
-    console.table(clientesRankeados.map((c) => ({
-      CLIENTE: c.nombre,
-      MOROSIDAD: c.morosidadMax,
-      TOTAL: c.totalGeneral.toFixed(2),
-      DOCS: c.documentos.length,
-    })));
-    console.log("Detalle por cliente:");
-    for (const c of clientesRankeados) {
-      console.group(c.nombre);
-      console.table(c.documentos.map((d) => ({
-        TIPO: d.TIPO,
-        NUMERO: d.NUMERO,
-        EMISION: d.EMISION,
-        VENCIMIENTO: d.VENCIMIENTO,
-        MOROSIDAD: d.MOROSIDAD,
-        VENDEDOR: d.VENDEDOR,
-        TOTAL: d.TOTAL?.toFixed(2),
-      })));
-      console.log(`Total ${c.nombre}: $${c.totalGeneral.toFixed(2)}`);
-      console.groupEnd();
-    }
+    const resultado = rankearClientes(todosDocumentos);
+    setClientesRankeados(resultado);
   };
+
+  function descargarExcel() {
+    if (!clientesRankeados) return;
+
+    const rows: Record<string, unknown>[] = [];
+    for (let i = 0; i < clientesRankeados.length; i++) {
+      const cliente = clientesRankeados[i];
+      for (const doc of cliente.documentos) {
+        rows.push({
+          RANGO: i + 1,
+          CLIENTE: cliente.nombre,
+          TIPO: doc.TIPO,
+          NUMERO: doc.NUMERO,
+          EMISION: doc.EMISION,
+          VENCIMIENTO: doc.VENCIMIENTO,
+          MOROSIDAD: doc.MOROSIDAD,
+          TOTAL: doc.TOTAL,
+        });
+      }
+    }
+
+    const ws = XLSX.utils.json_to_sheet(rows, { header: ["RANGO", "CLIENTE", "TIPO", "NUMERO", "EMISION", "VENCIMIENTO", "MOROSIDAD", "TOTAL"] });
+
+    const colWidths = [
+      { wch: 6 },
+      { wch: 40 },
+      { wch: 6 },
+      { wch: 10 },
+      { wch: 12 },
+      { wch: 12 },
+      { wch: 10 },
+      { wch: 12 },
+    ];
+    ws["!cols"] = colWidths;
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "CXC");
+
+    const nombreBase = fileName?.replace(/\.[^.]+$/, "") ?? "CXC";
+    XLSX.writeFile(wb, `${nombreBase}_limpio.xlsx`);
+  }
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-white px-4">
-      <div className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-        <label
-          htmlFor="excel-upload"
-          className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-zinc-300 px-6 py-10 text-center transition hover:border-zinc-400"
-        >
-          <span className="mb-2 text-sm font-medium text-zinc-800">
-            Sube tu archivo Excel
-          </span>
-          <span className="mb-4 text-sm text-zinc-500">
-            {fileName ? `Archivo: ${fileName}` : "Acepta archivos .xls y .xlsx"}
-          </span>
-          <input
-            id="excel-upload"
-            type="file"
-            accept=".xls,.xlsx"
-            className="sr-only"
-            onChange={handleFileChange}
-          />
-          <span className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white">
-            Seleccionar archivo
-          </span>
-        </label>
+      <div className="w-full max-w-md space-y-4">
+        <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
+          <label
+            htmlFor="excel-upload"
+            className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-zinc-300 px-6 py-10 text-center transition hover:border-zinc-400"
+          >
+            <span className="mb-2 text-sm font-medium text-zinc-800">
+              Sube tu archivo Excel
+            </span>
+            <span className="mb-4 text-sm text-zinc-500">
+              {fileName ? `Archivo: ${fileName}` : "Acepta archivos .xls y .xlsx"}
+            </span>
+            <input
+              id="excel-upload"
+              type="file"
+              accept=".xls,.xlsx"
+              className="sr-only"
+              onChange={handleFileChange}
+            />
+            <span className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white">
+              Seleccionar archivo
+            </span>
+          </label>
+        </div>
+
+        {clientesRankeados && (
+          <button
+            type="button"
+            onClick={descargarExcel}
+            className="w-full rounded-md bg-emerald-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-emerald-700"
+          >
+            Descargar Excel limpio
+          </button>
+        )}
       </div>
     </main>
   );
