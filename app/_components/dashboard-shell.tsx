@@ -1,15 +1,13 @@
+//COMPONENTE EN LA RUTA /_COMPONENTS/DASHBOARD-SHELL
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BarChart3,
-  FileSpreadsheet,
   LayoutDashboard,
-  Menu,
   PanelLeftClose,
   PanelRightClose,
-  Settings,
 } from "lucide-react";
 import { createContext, useContext, useMemo, useState } from "react";
 import type { ComponentProps, ElementType, ReactNode } from "react";
@@ -54,7 +52,7 @@ function Sidebar({ className, children, ...props }: ComponentProps<"aside">) {
     <aside
       data-collapsed={collapsed}
       className={cn(
-        "flex h-screen flex-col border-r border-zinc-200 bg-white transition-all duration-200",
+        "flex h-full flex-col border-r border-zinc-200 bg-white transition-all duration-200",
         collapsed ? "w-20" : "w-72",
         className
       )}
@@ -136,7 +134,7 @@ function SidebarTrigger({ className }: ComponentProps<"button">) {
 }
 
 function SidebarInset({ className, children }: ComponentProps<"main">) {
-  return <main className={cn("flex-1", className)}>{children}</main>;
+  return <main className={cn("flex-1 flex flex-col overflow-hidden", className)}>{children}</main>;
 }
 
 type NavItem = {
@@ -146,16 +144,15 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
-  { href: "/dash", label: "Inicio", icon: LayoutDashboard },
-  { href: "/dash/files", label: "Archivos", icon: FileSpreadsheet },
+  { href: "/", label: "Inicio", icon: LayoutDashboard },
 ];
 
 export function DashboardShell({ children }: { children: ReactNode }) {
   const { collapsed } = useSidebar();
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <div className="flex min-h-screen">
+    <div className="h-screen overflow-hidden bg-zinc-50">
+      <div className="flex h-full">
         <Sidebar>
           <SidebarHeader>
             <div className="flex items-center justify-between">
@@ -185,16 +182,15 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         </Sidebar>
 
         <SidebarInset>
-          <header className="border-b border-zinc-200 bg-white/80 px-6 py-4 backdrop-blur">
+          <header className="shrink-0 border-b border-zinc-200 bg-white/80 px-6 py-4 backdrop-blur">
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-xl font-semibold text-zinc-900">Cuentas x Cobrar</h1>
               </div>
-
             </div>
           </header>
 
-          <div className="p-6">{children}</div>
+          <div className="flex flex-1 flex-col overflow-hidden p-6">{children}</div>
         </SidebarInset>
       </div>
     </div>
