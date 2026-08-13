@@ -1,0 +1,66 @@
+// Modelos para CXC G&M - Cuentas por Cobrar
+// Documentar: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TipoDocumento {
+  FACT
+  NCR
+}
+
+// Una carga = la subida de un archivo Excel del ERP
+model Carga {
+  id            String       @id @default(cuid())
+  nombreArchivo String
+  cargadoEn     DateTime     @default(now())
+  documentos    Documento[]
+
+  @@map("carga")
+}
+
+model Cliente {
+  id         String      @id @default(cuid())
+  rif        String?     @unique
+  nombre     String
+  documentos Documento[]
+
+  @@map("cliente")
+}
+
+model Vendedor {
+  id         String      @id @default(cuid())
+  codigo     String      @unique
+  nombre     String
+  documentos Documento[]
+
+  @@map("vendedor")
+}
+
+model Documento {
+  id          String        @id @default(cuid())
+  cargaId     String
+  clienteId   String?
+  vendedorId  String?
+  tipo        TipoDocumento
+  numero      String
+  emision     String?
+  vencimiento String?
+  morosidad   Int
+  total       Decimal?
+
+  carga    Carga    @relation(fields: [cargaId], references: [id], onDelete: Cascade)
+  cliente  Cliente?  @relation(fields: [clienteId], references: [id], onDelete: SetNull)
+  vendedor Vendedor? @relation(fields: [vendedorId], references: [id], onDelete: SetNull)
+
+  @@index([cargaId])
+  @@index([clienteId])
+  @@index([vendedorId])
+  @@map("documento")
+}
