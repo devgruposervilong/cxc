@@ -4,9 +4,8 @@
 import { Fragment, useMemo, useState } from "react";
 import { usePanel } from "../page";
 import { filasDesdeRanking } from "@/lib/process-file";
-import type { FilaData } from "@/lib/process-file";
 import { rankearClientes } from "@/lib/clientes";
-import type { Documento } from "@/lib/clientes";
+import type { FilaData, Documento, TipoDocumento } from "@/lib/types";
 import * as XLSX from "xlsx";
 import { Download, Trash2 } from "lucide-react";
 
@@ -93,7 +92,7 @@ export default function Data() {
   function eliminarDocumento(id: string) {
     const restante = filas.filter((f) => f.id !== id);
     const documentos: Documento[] = restante.map((f) => ({
-      TIPO: f.TIPO,
+      TIPO: f.TIPO as TipoDocumento,
       NUMERO: f.NUMERO,
       EMISION: f.EMISION,
       VENCIMIENTO: f.VENCIMIENTO,
@@ -107,7 +106,8 @@ export default function Data() {
   }
 
   function descargarData() {
-    const rows = filas.map((f) => ({
+    const filasExport = grupos.flatMap((g) => g.docs);
+    const rows = filasExport.map((f) => ({
       RANGO: f.RANGO,
       CLIENTE: f.CLIENTE,
       TIPO: f.TIPO,
@@ -203,9 +203,9 @@ export default function Data() {
                 ? "bg-zinc-900 text-white"
                 : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
             }`}
-            title={`Facturas: ${v.facturas} | N/C: ${v.notasCredito} | CxC: ${formatoMoneda(v.totalCxC)} (${v.porcentaje.toFixed(1)}%)`}
+            title={`Facturas: ${v.facturas} | N/C: ${v.notasCredito} | CxC: ${formatoMoneda(v.totalCxC)}`}
           >
-            {v.vendedor}
+            {v.vendedor} · {v.porcentaje.toFixed(1)}%
           </button>
         ))}
       </div>
@@ -221,7 +221,7 @@ export default function Data() {
               <th className="px-4 py-3 font-semibold text-zinc-700">NUMERO</th>
               <th className="px-4 py-3 font-semibold text-zinc-700">EMISION</th>
               <th className="px-4 py-3 font-semibold text-zinc-700">VENCIMIENTO</th>
-              <th className="px-4 py-3 font-semibold text-zinc-700">MOROSIDAD</th>
+              <th className="px-4 py-3 text-center font-semibold text-zinc-700">MOROSIDAD</th>
               <th className="px-4 py-3 text-right font-semibold text-zinc-700">TOTAL</th>
               <th className="px-4 py-3 font-semibold text-zinc-700">ACCIONES</th>
             </tr>
@@ -237,7 +237,7 @@ export default function Data() {
                     <td className="px-4 py-2 text-zinc-700">{String(f.NUMERO ?? "")}</td>
                     <td className="px-4 py-2 text-zinc-700">{f.EMISION}</td>
                     <td className="px-4 py-2 text-zinc-700">{f.VENCIMIENTO}</td>
-                    <td className={`px-4 py-2 ${f.MOROSIDAD >= 15 ? "text-red-600" : "text-zinc-700"}`}>
+                    <td className={`px-4 py-2 text-center ${f.MOROSIDAD >= 15 ? "text-red-600" : "text-zinc-700"}`}>
                       {f.MOROSIDAD}
                     </td>
                     <td className="px-4 py-2 text-right text-zinc-700">{formatoMoneda(f.TOTAL ?? 0)}</td>

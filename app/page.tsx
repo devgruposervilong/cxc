@@ -2,7 +2,7 @@
 "use client";
 
 import { createContext, useContext, useState } from "react";
-import type { FilaData } from "@/lib/process-file";
+import type { FilaData } from "@/lib/types";
 import CargarData from "./_components/cargar-data";
 import Data from "./_components/data";
 

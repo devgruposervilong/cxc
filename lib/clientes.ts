@@ -1,22 +1,4 @@
-export type Documento = {
-  TIPO: string;
-  NUMERO: unknown;
-  EMISION: string | null;
-  VENCIMIENTO: string | null;
-  MOROSIDAD: number;
-  VENDEDOR: string | null;
-  RIF_CLIENTE: string | null;
-  TOTAL: number | null;
-  CLIENTE: string | null;
-};
-
-export type ClienteRankeado = {
-  nombre: string;
-  morosidadMax: number;
-  montoTiebreaker: number;
-  documentos: Documento[];
-  totalGeneral: number;
-};
+import type { ClienteRankeado, Documento } from "@/lib/types";
 
 export function rankearClientes(documentos: Documento[]): ClienteRankeado[] {
   const grupos = new Map<string, Documento[]>();

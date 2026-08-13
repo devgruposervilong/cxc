@@ -1,6 +1,6 @@
 import * as XLSX from "xlsx";
 import { rankearClientes } from "@/lib/clientes";
-import type { ClienteRankeado, Documento } from "@/lib/clientes";
+import type { ClienteRankeado, Documento, FilaData, TipoDocumento } from "@/lib/types";
 
 const COLUMN_NAMES = [
   "TIPO", "NUMERO", "EMISION", "VENCIMIENTO", "OBSERVACION",
@@ -58,8 +58,10 @@ function aNumero(value: unknown): number | null {
 }
 
 function limpiarDocumento(row: Record<string, unknown>, hoy: Date) {
-  const { MONEDA, TASA_1, TASA_2, VACIO_1, VACIO_2, SALDO, OBSERVACION, ...rest } = row;
-  const codVendedor = String(rest.COD_VENDEDOR ?? "").trim();
+  const {
+    MONEDA, TASA_1, TASA_2, VACIO_1, VACIO_2, SALDO, OBSERVACION, COD_VENDEDOR, ...rest
+  } = row;
+  const codVendedor = String(COD_VENDEDOR ?? "").trim();
   const vendedor = VENDEDORES[codVendedor] ?? null;
   const tipo = String(rest.TIPO ?? "").trim();
   const esDocumento = tipo === "FACT" || tipo === "Factura";
@@ -72,6 +74,8 @@ function limpiarDocumento(row: Record<string, unknown>, hoy: Date) {
   }
   return {
     ...rest,
+    TIPO: tipo as TipoDocumento,
+    NUMERO: String(rest.NUMERO ?? ""),
     EMISION: excelSerialToDate(rest.EMISION),
     VENCIMIENTO: excelSerialToDate(rest.VENCIMIENTO),
     VENDEDOR: vendedor,
@@ -81,19 +85,6 @@ function limpiarDocumento(row: Record<string, unknown>, hoy: Date) {
     CLIENTE: null,
   };
 }
-
-export type FilaData = {
-  id: string;
-  RANGO: number;
-  CLIENTE: string;
-  TIPO: string;
-  NUMERO: unknown;
-  EMISION: string | null;
-  VENCIMIENTO: string | null;
-  MOROSIDAD: number;
-  TOTAL: number | null;
-  VENDEDOR: string | null;
-};
 
 // Aplana el ranking de clientes en las filas que muestra la tabla, asignando
 // el RANGO (1..n) y un id único por documento.
