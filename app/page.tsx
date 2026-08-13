@@ -11,6 +11,8 @@ type PanelContextValue = {
   setFilas: (filas: FilaData[]) => void;
   nombreArchivo: string;
   setNombreArchivo: (name: string) => void;
+  cargadoEn: string | null;
+  setCargadoEn: (cuando: string | null) => void;
 };
 
 const PanelContext = createContext<PanelContextValue | null>(null);
@@ -24,9 +26,12 @@ export function usePanel() {
 export default function Home() {
   const [filas, setFilas] = useState<FilaData[]>([]);
   const [nombreArchivo, setNombreArchivo] = useState("");
+  const [cargadoEn, setCargadoEn] = useState<string | null>(null);
 
   return (
-    <PanelContext.Provider value={{ filas, setFilas, nombreArchivo, setNombreArchivo }}>
+    <PanelContext.Provider
+      value={{ filas, setFilas, nombreArchivo, setNombreArchivo, cargadoEn, setCargadoEn }}
+    >
       <div className="flex h-full flex-col gap-4">
         {filas.length === 0 ? <CargarData /> : <Data />}
       </div>

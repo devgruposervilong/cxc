@@ -1,6 +1,6 @@
 import * as XLSX from "xlsx";
 import { rankearClientes } from "@/lib/clientes";
-import type { Documento } from "@/lib/clientes";
+import type { ClienteRankeado, Documento } from "@/lib/clientes";
 
 const COLUMN_NAMES = [
   "TIPO", "NUMERO", "EMISION", "VENCIMIENTO", "OBSERVACION",
@@ -83,6 +83,7 @@ function limpiarDocumento(row: Record<string, unknown>, hoy: Date) {
 }
 
 export type FilaData = {
+  id: string;
   RANGO: number;
   CLIENTE: string;
   TIPO: string;
@@ -93,6 +94,31 @@ export type FilaData = {
   TOTAL: number | null;
   VENDEDOR: string | null;
 };
+
+// Aplana el ranking de clientes en las filas que muestra la tabla, asignando
+// el RANGO (1..n) y un id único por documento.
+export function filasDesdeRanking(clientesRankeados: ClienteRankeado[]): FilaData[] {
+  const filas: FilaData[] = [];
+  let seq = 0;
+  for (let i = 0; i < clientesRankeados.length; i++) {
+    const cliente = clientesRankeados[i];
+    for (const doc of cliente.documentos) {
+      filas.push({
+        id: `doc-${seq++}`,
+        RANGO: i + 1,
+        CLIENTE: cliente.nombre,
+        TIPO: doc.TIPO,
+        NUMERO: doc.NUMERO,
+        EMISION: doc.EMISION,
+        VENCIMIENTO: doc.VENCIMIENTO,
+        MOROSIDAD: doc.MOROSIDAD,
+        TOTAL: doc.TOTAL,
+        VENDEDOR: doc.VENDEDOR,
+      });
+    }
+  }
+  return filas;
+}
 
 export async function procesarArchivo(file: File): Promise<FilaData[]> {
   const buffer = await file.arrayBuffer();
@@ -132,23 +158,5 @@ export async function procesarArchivo(file: File): Promise<FilaData[]> {
   const todosDocumentos = [...facturasConCliente, ...notasCreditoConCliente];
   const clientesRankeados = rankearClientes(todosDocumentos);
 
-  const filas: FilaData[] = [];
-  for (let i = 0; i < clientesRankeados.length; i++) {
-    const cliente = clientesRankeados[i];
-    for (const doc of cliente.documentos) {
-      filas.push({
-        RANGO: i + 1,
-        CLIENTE: cliente.nombre,
-        TIPO: doc.TIPO,
-        NUMERO: doc.NUMERO,
-        EMISION: doc.EMISION,
-        VENCIMIENTO: doc.VENCIMIENTO,
-        MOROSIDAD: doc.MOROSIDAD,
-        TOTAL: doc.TOTAL,
-        VENDEDOR: doc.VENDEDOR,
-      });
-    }
-  }
-
-  return filas;
+  return filasDesdeRanking(clientesRankeados);
 }

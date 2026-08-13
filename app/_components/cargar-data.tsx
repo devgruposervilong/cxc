@@ -7,7 +7,7 @@ import { procesarArchivo } from "@/lib/process-file";
 import { Upload } from "lucide-react";
 
 export default function CargarData() {
-  const { setFilas, setNombreArchivo, nombreArchivo } = usePanel();
+  const { setFilas, setNombreArchivo, nombreArchivo, setCargadoEn } = usePanel();
   const [dragOver, setDragOver] = useState(false);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -18,6 +18,12 @@ export default function CargarData() {
     try {
       const filas = await procesarArchivo(file);
       setFilas(filas);
+      const ahora = new Date();
+      const dia = String(ahora.getDate()).padStart(2, "0");
+      const mes = String(ahora.getMonth() + 1).padStart(2, "0");
+      const hora = String(ahora.getHours()).padStart(2, "0");
+      const minutos = String(ahora.getMinutes()).padStart(2, "0");
+      setCargadoEn(`${dia}/${mes}/${ahora.getFullYear()} ${hora}:${minutos}`);
     } finally {
       setLoading(false);
     }

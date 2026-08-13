@@ -3,7 +3,10 @@
 
 import { Fragment, useMemo, useState } from "react";
 import { usePanel } from "../page";
+import { filasDesdeRanking } from "@/lib/process-file";
 import type { FilaData } from "@/lib/process-file";
+import { rankearClientes } from "@/lib/clientes";
+import type { Documento } from "@/lib/clientes";
 import * as XLSX from "xlsx";
 import { Download, Trash2 } from "lucide-react";
 
@@ -23,7 +26,8 @@ function formatoMoneda(valor: number) {
 }
 
 export default function Data() {
-  const { filas, nombreArchivo, setFilas, setNombreArchivo } = usePanel();
+  const { filas, nombreArchivo, cargadoEn, setFilas, setNombreArchivo, setCargadoEn } =
+    usePanel();
   const [selectedVendedor, setSelectedVendedor] = useState<string | null>(null);
 
   const filasFiltradas = useMemo(() => {
@@ -83,6 +87,23 @@ export default function Data() {
   function eliminarData() {
     setFilas([]);
     setNombreArchivo("");
+    setCargadoEn(null);
+  }
+
+  function eliminarDocumento(id: string) {
+    const restante = filas.filter((f) => f.id !== id);
+    const documentos: Documento[] = restante.map((f) => ({
+      TIPO: f.TIPO,
+      NUMERO: f.NUMERO,
+      EMISION: f.EMISION,
+      VENCIMIENTO: f.VENCIMIENTO,
+      MOROSIDAD: f.MOROSIDAD,
+      VENDEDOR: f.VENDEDOR,
+      RIF_CLIENTE: null,
+      TOTAL: f.TOTAL,
+      CLIENTE: f.CLIENTE,
+    }));
+    setFilas(filasDesdeRanking(rankearClientes(documentos)));
   }
 
   function descargarData() {
@@ -115,22 +136,27 @@ export default function Data() {
 
   return (
     <div className="flex h-full flex-col gap-4">
-      {/* Toolbar: acciones en la parte superior derecha */}
-      <div className="flex shrink-0 items-center justify-end gap-2">
-        <button
-          onClick={eliminarData}
-          className="inline-flex items-center gap-2 rounded-md bg-red-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2"
-        >
-          <Trash2 className="h-4 w-4" />
-          ELIMINAR
-        </button>
-        <button
-          onClick={descargarData}
-          className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700"
-        >
-          <Download className="h-4 w-4" />
-          DESCARGAR DATA
-        </button>
+      {/* Toolbar: información de carga y acciones en la parte superior derecha */}
+      <div className="flex shrink-0 items-center justify-between gap-2">
+        <span className="text-sm text-zinc-500">
+          {nombreArchivo} · Cargado: {cargadoEn}
+        </span>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={eliminarData}
+            className="inline-flex items-center gap-2 rounded-md bg-red-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2"
+          >
+            <Trash2 className="h-4 w-4" />
+            ELIMINAR
+          </button>
+          <button
+            onClick={descargarData}
+            className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700"
+          >
+            <Download className="h-4 w-4" />
+            DESCARGAR DATA
+          </button>
+        </div>
       </div>
 
       {/* Dashboard cards */}
@@ -197,6 +223,7 @@ export default function Data() {
               <th className="px-4 py-3 font-semibold text-zinc-700">VENCIMIENTO</th>
               <th className="px-4 py-3 font-semibold text-zinc-700">MOROSIDAD</th>
               <th className="px-4 py-3 text-right font-semibold text-zinc-700">TOTAL</th>
+              <th className="px-4 py-3 font-semibold text-zinc-700">ACCIONES</th>
             </tr>
           </thead>
           <tbody>
@@ -214,6 +241,16 @@ export default function Data() {
                       {f.MOROSIDAD}
                     </td>
                     <td className="px-4 py-2 text-right text-zinc-700">{formatoMoneda(f.TOTAL ?? 0)}</td>
+                    <td className="px-4 py-2">
+                      <button
+                        onClick={() => eliminarDocumento(f.id)}
+                        className="rounded p-1 text-zinc-400 transition hover:bg-red-50 hover:text-red-600"
+                        aria-label="Eliminar documento"
+                        title="Eliminar documento"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </td>
                   </tr>
                 ))}
                 <tr className="border-b border-zinc-200 bg-zinc-100 font-medium">
@@ -221,6 +258,7 @@ export default function Data() {
                     Subtotal {g.cliente}
                   </td>
                   <td className="px-4 py-2 text-right text-zinc-900">{formatoMoneda(g.subtotal)}</td>
+                  <td />
                 </tr>
               </Fragment>
             ))}
@@ -229,6 +267,7 @@ export default function Data() {
                 TOTAL
               </td>
               <td className="px-4 py-3 text-right">{formatoMoneda(totalGeneral)}</td>
+              <td />
             </tr>
           </tbody>
         </table>
