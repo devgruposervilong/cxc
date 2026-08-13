@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 export default function DashboardShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex h-screen overflow-hidden justify-center bg-zinc-50">
-      <div className="flex w-[60%] flex-col">
+      <div className="flex w-[80%] flex-col">
         <header className="shrink-0 border-b border-zinc-200 bg-white/80 px-6 py-4 backdrop-blur">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-900 text-white">

@@ -14,16 +14,12 @@ type GrupoCliente = {
   subtotal: number;
 };
 
-function formatoDosDecimales(valor: number) {
-  return `$${valor.toFixed(2)}`;
-}
-
-function formatoSinRedondear(valor: number) {
-  const limpio = Number(valor.toFixed(10));
-  return `$${limpio.toLocaleString("en-US", {
-    maximumFractionDigits: 20,
-    useGrouping: false,
-  })}`;
+function formatoMoneda(valor: number) {
+  const negativo = valor < 0;
+  const abs = Math.abs(valor);
+  const [entera, decimal] = abs.toFixed(2).split(".");
+  const conMiles = entera.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return `${negativo ? "-" : ""}$${conMiles},${decimal}`;
 }
 
 export default function Data() {
@@ -138,7 +134,7 @@ export default function Data() {
       </div>
 
       {/* Dashboard cards */}
-      <div className="grid shrink-0 grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid shrink-0 grid-cols-2 gap-4 lg:grid-cols-3">
         <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
           <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Total Facturas</p>
           <p className="mt-1 text-2xl font-semibold text-zinc-900">{totalFacturas}</p>
@@ -150,20 +146,12 @@ export default function Data() {
         <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
           <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Total Cuentas x Cobrar</p>
           <p className="mt-1 text-2xl font-semibold text-emerald-600">
-            {formatoDosDecimales(totalGeneral)}
+            {formatoMoneda(totalGeneral)}
             {selectedVendedor && (
               <span className="ml-2 text-sm font-normal text-zinc-500">
                 ({((totalGeneral / (totalCxCGlobal || 1)) * 100).toFixed(1)}%)
               </span>
             )}
-          </p>
-        </div>
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 shadow-sm">
-          <p className="text-xs font-medium uppercase tracking-wide text-amber-700">
-            Total sin redondear (validación ERP)
-          </p>
-          <p className="mt-1 text-2xl font-semibold text-amber-900">
-            {formatoSinRedondear(totalGeneral)}
           </p>
         </div>
       </div>
@@ -189,7 +177,7 @@ export default function Data() {
                 ? "bg-zinc-900 text-white"
                 : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
             }`}
-            title={`Facturas: ${v.facturas} | N/C: ${v.notasCredito} | CxC: ${formatoDosDecimales(v.totalCxC)} (${v.porcentaje.toFixed(1)}%)`}
+            title={`Facturas: ${v.facturas} | N/C: ${v.notasCredito} | CxC: ${formatoMoneda(v.totalCxC)} (${v.porcentaje.toFixed(1)}%)`}
           >
             {v.vendedor}
           </button>
@@ -222,15 +210,17 @@ export default function Data() {
                     <td className="px-4 py-2 text-zinc-700">{String(f.NUMERO ?? "")}</td>
                     <td className="px-4 py-2 text-zinc-700">{f.EMISION}</td>
                     <td className="px-4 py-2 text-zinc-700">{f.VENCIMIENTO}</td>
-                    <td className="px-4 py-2 text-zinc-700">{f.MOROSIDAD}</td>
-                    <td className="px-4 py-2 text-right text-zinc-700">{formatoDosDecimales(f.TOTAL ?? 0)}</td>
+                    <td className={`px-4 py-2 ${f.MOROSIDAD >= 15 ? "text-red-600" : "text-zinc-700"}`}>
+                      {f.MOROSIDAD}
+                    </td>
+                    <td className="px-4 py-2 text-right text-zinc-700">{formatoMoneda(f.TOTAL ?? 0)}</td>
                   </tr>
                 ))}
-                <tr className="border-b border-zinc-200 bg-zinc-50 font-medium">
+                <tr className="border-b border-zinc-200 bg-zinc-100 font-medium">
                   <td colSpan={7} className="px-4 py-2 text-right text-zinc-700">
                     Subtotal {g.cliente}
                   </td>
-                  <td className="px-4 py-2 text-right text-zinc-900">{formatoDosDecimales(g.subtotal)}</td>
+                  <td className="px-4 py-2 text-right text-zinc-900">{formatoMoneda(g.subtotal)}</td>
                 </tr>
               </Fragment>
             ))}
@@ -238,7 +228,7 @@ export default function Data() {
               <td colSpan={7} className="px-4 py-3 text-right">
                 TOTAL
               </td>
-              <td className="px-4 py-3 text-right">{formatoDosDecimales(totalGeneral)}</td>
+              <td className="px-4 py-3 text-right">{formatoMoneda(totalGeneral)}</td>
             </tr>
           </tbody>
         </table>
