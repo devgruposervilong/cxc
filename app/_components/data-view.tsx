@@ -2,9 +2,11 @@
 "use client";
 
 import { Fragment, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { usePanel } from "../page";
 import { rankRows } from "@/lib/ranking";
 import { saveUpload, deleteUpload } from "@/lib/api/uploads";
+import { UPLOAD_QUERY_KEY } from "@/lib/hooks/use-upload-data";
 import type { DataRow, DocumentType } from "@/lib/types";
 import * as XLSX from "xlsx";
 import { Database, Download, Trash2 } from "lucide-react";
@@ -31,6 +33,7 @@ export default function DataView() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [saveStatus, setSaveStatus] = useState<{ text: string; ok: boolean } | null>(null);
+  const queryClient = useQueryClient();
 
   const filteredRows = useMemo(() => {
     if (!selectedVendedor) return filas;
@@ -141,6 +144,7 @@ export default function DataView() {
       });
       setUploadId(result.uploadId);
       setSaveStatus({ text: `Guardado: ${result.savedRows} documentos`, ok: true });
+      queryClient.invalidateQueries({ queryKey: UPLOAD_QUERY_KEY });
     } catch (error) {
       setSaveStatus({
         text: error instanceof Error ? error.message : "Error al guardar",
@@ -162,6 +166,7 @@ export default function DataView() {
       await deleteUpload(uploadId);
       clearData();
       setSaveStatus({ text: "Carga eliminada", ok: true });
+      queryClient.invalidateQueries({ queryKey: UPLOAD_QUERY_KEY });
     } catch (error) {
       setSaveStatus({
         text: error instanceof Error ? error.message : "Error al eliminar",

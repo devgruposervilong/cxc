@@ -2,6 +2,7 @@
 // No puede haber route.ts al mismo nivel que page.tsx, por eso vive en /api/uploads.
 import { NextResponse } from "next/server";
 import { persistUpload } from "@/services/persist-upload";
+import { getLatestUploadWithDocuments } from "@/services/load-upload";
 import type { DataRow } from "@/lib/types";
 
 type PersistUploadBody = {
@@ -9,6 +10,16 @@ type PersistUploadBody = {
   loadedAt: string;
   rows: DataRow[];
 };
+
+export async function GET() {
+  try {
+    const data = await getLatestUploadWithDocuments();
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error("getLatestUploadWithDocuments failed:", error);
+    return NextResponse.json({ error: "Failed to load upload" }, { status: 500 });
+  }
+}
 
 export async function POST(request: Request) {
   let body: PersistUploadBody;

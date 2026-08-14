@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Providers from "./providers";
 import DashboardShellWithProvider from "./_components/dashboard-shell";
 
 const geistSans = Geist({
@@ -40,7 +41,9 @@ export default function RootLayout({
         <meta name="robots" content="noindex,nofollow" />
       </head>
       <body className="min-h-full flex flex-col">
-        <DashboardShellWithProvider>{children}</DashboardShellWithProvider>
+        <Providers>
+          <DashboardShellWithProvider>{children}</DashboardShellWithProvider>
+        </Providers>
       </body>
     </html>
   );
