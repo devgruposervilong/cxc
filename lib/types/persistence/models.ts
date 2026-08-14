@@ -1,29 +1,29 @@
-import type { TipoDocumento } from "../domain/documento";
+import type { DocumentType } from "../domain/documento";
 
-export type CargaModel = {
+export type UploadModel = {
   id: string;
-  nombreArchivo: string;
-  cargadoEn: string;
+  fileName: string;
+  loadedAt: string;
 };
 
-export type ClienteModel = {
+export type ClientModel = {
   id: string;
   rif: string | null;
-  nombre: string;
+  name: string;
 };
 
-export type VendedorModel = {
+export type SellerModel = {
   id: string;
-  codigo: string;
-  nombre: string;
+  code: string;
+  name: string;
 };
 
-export type DocumentoModel = {
+export type DocumentModel = {
   id: string;
-  cargaId: string;
-  clienteId: string | null;
-  vendedorId: string | null;
-  tipo: TipoDocumento;
+  uploadId: string;
+  clientId: string | null;
+  sellerId: string | null;
+  type: DocumentType;
   numero: string;
   emision: string | null;
   vencimiento: string | null;

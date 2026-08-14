@@ -1,37 +1,37 @@
 import { prisma } from "@/lib/prisma";
 import type {
-  CargaModel,
-  CargaRepository,
-  CrearCargaInput,
+  CreateUploadInput,
+  UploadModel,
+  UploadRepository,
 } from "@/lib/types";
-import { cargaAModelo, parsearCargadoEn } from "./mappers";
+import { parseLoadedAt, uploadToModel } from "./mappers";
 
-export class PrismaCargaRepository implements CargaRepository {
-  async crearCarga(input: CrearCargaInput): Promise<CargaModel> {
-    const carga = await prisma.carga.create({
+export class PrismaUploadRepository implements UploadRepository {
+  async createUpload(input: CreateUploadInput): Promise<UploadModel> {
+    const upload = await prisma.carga.create({
       data: {
-        nombreArchivo: input.nombreArchivo,
-        cargadoEn: parsearCargadoEn(input.cargadoEn),
+        nombreArchivo: input.fileName,
+        cargadoEn: parseLoadedAt(input.loadedAt),
       },
     });
-    return cargaAModelo(carga);
+    return uploadToModel(upload);
   }
 
-  async obtenerCargas(): Promise<CargaModel[]> {
-    const cargas = await prisma.carga.findMany({
+  async getUploads(): Promise<UploadModel[]> {
+    const uploads = await prisma.carga.findMany({
       orderBy: { cargadoEn: "desc" },
     });
-    return cargas.map(cargaAModelo);
+    return uploads.map(uploadToModel);
   }
 
-  async obtenerCargaMasReciente(): Promise<CargaModel | null> {
-    const carga = await prisma.carga.findFirst({
+  async getLatestUpload(): Promise<UploadModel | null> {
+    const upload = await prisma.carga.findFirst({
       orderBy: { cargadoEn: "desc" },
     });
-    return carga ? cargaAModelo(carga) : null;
+    return upload ? uploadToModel(upload) : null;
   }
 
-  async eliminarCarga(id: string): Promise<void> {
+  async deleteUpload(id: string): Promise<void> {
     await prisma.carga.delete({ where: { id } });
   }
 }

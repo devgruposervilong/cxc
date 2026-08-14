@@ -1,12 +1,12 @@
-//COMPONENTE EN LA RUTA /_COMPONENTS/CARGAR-DATA
+//COMPONENTE EN LA RUTA /_COMPONENTS/FILE-UPLOAD
 "use client";
 
 import { useRef, useState } from "react";
 import { usePanel } from "../page";
-import { procesarArchivo } from "@/lib/process-file";
+import { processFile } from "@/lib/process-file";
 import { Upload } from "lucide-react";
 
-export default function CargarData() {
+export default function FileUpload() {
   const { setFilas, setNombreArchivo, nombreArchivo, setCargadoEn } = usePanel();
   const [dragOver, setDragOver] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -16,8 +16,8 @@ export default function CargarData() {
     setLoading(true);
     setNombreArchivo(file.name);
     try {
-      const filas = await procesarArchivo(file);
-      setFilas(filas);
+      const rows = await processFile(file);
+      setFilas(rows);
       const ahora = new Date();
       const dia = String(ahora.getDate()).padStart(2, "0");
       const mes = String(ahora.getMonth() + 1).padStart(2, "0");

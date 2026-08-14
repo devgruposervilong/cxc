@@ -1,7 +1,7 @@
-export type TipoDocumento = "FACT" | "N/CR";
+export type DocumentType = "FACT" | "N/CR";
 
-export type Documento = {
-  TIPO: TipoDocumento;
+export type Document = {
+  TIPO: DocumentType;
   NUMERO: string;
   EMISION: string | null;
   VENCIMIENTO: string | null;

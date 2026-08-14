@@ -1,16 +1,16 @@
-import type { TipoDocumento } from "../domain/documento";
-import type { CargaModel, ClienteModel, DocumentoModel, VendedorModel } from "./models";
+import type { DocumentType } from "../domain/documento";
+import type { ClientModel, DocumentModel, SellerModel, UploadModel } from "./models";
 
-export type CrearCargaInput = {
-  nombreArchivo: string;
-  cargadoEn: string;
+export type CreateUploadInput = {
+  fileName: string;
+  loadedAt: string;
 };
 
-export type CrearDocumentoInput = {
-  cargaId: string;
-  clienteId: string | null;
-  vendedorId: string | null;
-  tipo: TipoDocumento;
+export type CreateDocumentInput = {
+  uploadId: string;
+  clientId: string | null;
+  sellerId: string | null;
+  type: DocumentType;
   numero: string;
   emision: string | null;
   vencimiento: string | null;
@@ -18,36 +18,36 @@ export type CrearDocumentoInput = {
   total: number | null;
 };
 
-export type CrearClienteInput = {
+export type CreateClientInput = {
   rif: string | null;
-  nombre: string;
+  name: string;
 };
 
-export type CrearVendedorInput = {
-  codigo: string;
-  nombre: string;
+export type CreateSellerInput = {
+  code: string;
+  name: string;
 };
 
-export interface CargaRepository {
-  crearCarga(input: CrearCargaInput): Promise<CargaModel>;
-  obtenerCargas(): Promise<CargaModel[]>;
-  obtenerCargaMasReciente(): Promise<CargaModel | null>;
-  eliminarCarga(id: string): Promise<void>;
+export interface UploadRepository {
+  createUpload(input: CreateUploadInput): Promise<UploadModel>;
+  getUploads(): Promise<UploadModel[]>;
+  getLatestUpload(): Promise<UploadModel | null>;
+  deleteUpload(id: string): Promise<void>;
 }
 
-export interface DocumentoRepository {
-  crearDocumentos(inputs: CrearDocumentoInput[]): Promise<DocumentoModel[]>;
-  obtenerDocumentosPorCarga(cargaId: string): Promise<DocumentoModel[]>;
-  eliminarDocumento(id: string): Promise<void>;
-  eliminarDocumentosPorCarga(cargaId: string): Promise<void>;
+export interface DocumentRepository {
+  createDocuments(inputs: CreateDocumentInput[]): Promise<DocumentModel[]>;
+  getDocumentsByUpload(uploadId: string): Promise<DocumentModel[]>;
+  deleteDocument(id: string): Promise<void>;
+  deleteDocumentsByUpload(uploadId: string): Promise<void>;
 }
 
-export interface ClienteRepository {
-  crearClientes(inputs: CrearClienteInput[]): Promise<ClienteModel[]>;
-  obtenerClientes(): Promise<ClienteModel[]>;
+export interface ClientRepository {
+  createClients(inputs: CreateClientInput[]): Promise<ClientModel[]>;
+  getClients(): Promise<ClientModel[]>;
 }
 
-export interface VendedorRepository {
-  crearVendedores(inputs: CrearVendedorInput[]): Promise<VendedorModel[]>;
-  obtenerVendedores(): Promise<VendedorModel[]>;
+export interface SellerRepository {
+  createSellers(inputs: CreateSellerInput[]): Promise<SellerModel[]>;
+  getSellers(): Promise<SellerModel[]>;
 }

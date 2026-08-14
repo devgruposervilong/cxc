@@ -1,20 +1,20 @@
 import { prisma } from "@/lib/prisma";
 import type {
-  CrearDocumentoInput,
-  DocumentoModel,
-  DocumentoRepository,
+  CreateDocumentInput,
+  DocumentModel,
+  DocumentRepository,
 } from "@/lib/types";
-import { documentoAModelo, tipoDominioADb } from "./mappers";
+import { documentToModel, domainTypeToDb } from "./mappers";
 
-export class PrismaDocumentoRepository implements DocumentoRepository {
-  async crearDocumentos(inputs: CrearDocumentoInput[]): Promise<DocumentoModel[]> {
+export class PrismaDocumentRepository implements DocumentRepository {
+  async createDocuments(inputs: CreateDocumentInput[]): Promise<DocumentModel[]> {
     if (inputs.length === 0) return [];
-    const creados = await prisma.documento.createManyAndReturn({
+    const created = await prisma.documento.createManyAndReturn({
       data: inputs.map((input) => ({
-        cargaId: input.cargaId,
-        clienteId: input.clienteId,
-        vendedorId: input.vendedorId,
-        tipo: tipoDominioADb(input.tipo),
+        cargaId: input.uploadId,
+        clienteId: input.clientId,
+        vendedorId: input.sellerId,
+        tipo: domainTypeToDb(input.type),
         numero: input.numero,
         emision: input.emision,
         vencimiento: input.vencimiento,
@@ -22,21 +22,21 @@ export class PrismaDocumentoRepository implements DocumentoRepository {
         total: input.total,
       })),
     });
-    return creados.map(documentoAModelo);
+    return created.map(documentToModel);
   }
 
-  async obtenerDocumentosPorCarga(cargaId: string): Promise<DocumentoModel[]> {
-    const documentos = await prisma.documento.findMany({
-      where: { cargaId },
+  async getDocumentsByUpload(uploadId: string): Promise<DocumentModel[]> {
+    const documents = await prisma.documento.findMany({
+      where: { cargaId: uploadId },
     });
-    return documentos.map(documentoAModelo);
+    return documents.map(documentToModel);
   }
 
-  async eliminarDocumento(id: string): Promise<void> {
+  async deleteDocument(id: string): Promise<void> {
     await prisma.documento.delete({ where: { id } });
   }
 
-  async eliminarDocumentosPorCarga(cargaId: string): Promise<void> {
-    await prisma.documento.deleteMany({ where: { cargaId } });
+  async deleteDocumentsByUpload(uploadId: string): Promise<void> {
+    await prisma.documento.deleteMany({ where: { cargaId: uploadId } });
   }
 }

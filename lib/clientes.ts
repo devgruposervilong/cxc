@@ -1,45 +1,45 @@
-import type { ClienteRankeado, Documento } from "@/lib/types";
+import type { Document, RankedClient } from "@/lib/types";
 
-export function rankearClientes(documentos: Documento[]): ClienteRankeado[] {
-  const grupos = new Map<string, Documento[]>();
-  for (const doc of documentos) {
+export function rankClients(documents: Document[]): RankedClient[] {
+  const groups = new Map<string, Document[]>();
+  for (const doc of documents) {
     const key = doc.CLIENTE ?? "SIN_CLIENTE";
-    if (!grupos.has(key)) grupos.set(key, []);
-    grupos.get(key)!.push(doc);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(doc);
   }
 
-  const resultado: ClienteRankeado[] = [];
+  const result: RankedClient[] = [];
 
-  for (const [nombre, docs] of grupos) {
-    const morosidadMax = Math.max(...docs.map((d) => d.MOROSIDAD));
-    const facturasEnMax = docs.filter(
-      (d) => d.MOROSIDAD === morosidadMax && d.TIPO === "FACT"
+  for (const [name, docs] of groups) {
+    const maxOverdue = Math.max(...docs.map((d) => d.MOROSIDAD));
+    const invoicesAtMax = docs.filter(
+      (d) => d.MOROSIDAD === maxOverdue && d.TIPO === "FACT"
     );
-    const montoTiebreaker =
-      facturasEnMax.length > 0
-        ? Math.max(...facturasEnMax.map((d) => d.TOTAL ?? 0))
+    const tiebreakerAmount =
+      invoicesAtMax.length > 0
+        ? Math.max(...invoicesAtMax.map((d) => d.TOTAL ?? 0))
         : 0;
 
-    const totalGeneral = docs.reduce((sum, d) => sum + (d.TOTAL ?? 0), 0);
+    const groupTotal = docs.reduce((sum, d) => sum + (d.TOTAL ?? 0), 0);
 
-    const docsOrdenados = [...docs].sort((a, b) => {
+    const sortedDocs = [...docs].sort((a, b) => {
       if (b.MOROSIDAD !== a.MOROSIDAD) return b.MOROSIDAD - a.MOROSIDAD;
       return (b.TOTAL ?? 0) - (a.TOTAL ?? 0);
     });
 
-    resultado.push({
-      nombre,
-      morosidadMax,
-      montoTiebreaker,
-      documentos: docsOrdenados,
-      totalGeneral,
+    result.push({
+      name,
+      maxOverdue,
+      tiebreakerAmount,
+      documents: sortedDocs,
+      grandTotal: groupTotal,
     });
   }
 
-  resultado.sort((a, b) => {
-    if (b.morosidadMax !== a.morosidadMax) return b.morosidadMax - a.morosidadMax;
-    return b.montoTiebreaker - a.montoTiebreaker;
+  result.sort((a, b) => {
+    if (b.maxOverdue !== a.maxOverdue) return b.maxOverdue - a.maxOverdue;
+    return b.tiebreakerAmount - a.tiebreakerAmount;
   });
 
-  return resultado;
+  return result;
 }

@@ -1,22 +1,22 @@
-//COMPONENTE EN LA RUTA /_COMPONENTS/DATA
+//COMPONENTE EN LA RUTA /_COMPONENTS/DATA-VIEW
 "use client";
 
 import { Fragment, useMemo, useState } from "react";
 import { usePanel } from "../page";
-import { filasDesdeRanking } from "@/lib/process-file";
-import { rankearClientes } from "@/lib/clientes";
-import type { FilaData, Documento, TipoDocumento } from "@/lib/types";
+import { rowsFromRanking } from "@/lib/process-file";
+import { rankClients } from "@/lib/clientes";
+import type { DataRow, Document, DocumentType } from "@/lib/types";
 import * as XLSX from "xlsx";
 import { Download, Trash2 } from "lucide-react";
 
-type GrupoCliente = {
-  cliente: string;
-  rango: number;
-  docs: FilaData[];
+type ClientGroup = {
+  client: string;
+  rank: number;
+  docs: DataRow[];
   subtotal: number;
 };
 
-function formatoMoneda(valor: number) {
+function formatCurrency(valor: number) {
   const negativo = valor < 0;
   const abs = Math.abs(valor);
   const [entera, decimal] = abs.toFixed(2).split(".");
@@ -24,75 +24,75 @@ function formatoMoneda(valor: number) {
   return `${negativo ? "-" : ""}$${conMiles},${decimal}`;
 }
 
-export default function Data() {
+export default function DataView() {
   const { filas, nombreArchivo, cargadoEn, setFilas, setNombreArchivo, setCargadoEn } =
     usePanel();
   const [selectedVendedor, setSelectedVendedor] = useState<string | null>(null);
 
-  const filasFiltradas = useMemo(() => {
+  const filteredRows = useMemo(() => {
     if (!selectedVendedor) return filas;
     return filas.filter((f) => f.VENDEDOR === selectedVendedor);
   }, [filas, selectedVendedor]);
 
-  const totalFacturas = filasFiltradas.filter((f) => f.TIPO === "FACT").length;
-  const totalNC = filasFiltradas.filter((f) => f.TIPO === "N/CR").length;
-  const totalCxCGlobal = filas.reduce((s, f) => s + (f.TOTAL ?? 0), 0);
+  const totalInvoices = filteredRows.filter((f) => f.TIPO === "FACT").length;
+  const totalCreditNotes = filteredRows.filter((f) => f.TIPO === "N/CR").length;
+  const globalTotal = filas.reduce((s, f) => s + (f.TOTAL ?? 0), 0);
 
-  const vendedores = useMemo(() => {
-    const map = new Map<string, FilaData[]>();
+  const sellers = useMemo(() => {
+    const map = new Map<string, DataRow[]>();
     for (const f of filas) {
       const v = f.VENDEDOR ?? "SIN VENDEDOR";
       if (!map.has(v)) map.set(v, []);
       map.get(v)!.push(f);
     }
-    return Array.from(map.entries()).map(([vendedor, docs]) => ({
-      vendedor,
-      facturas: docs.filter((d) => d.TIPO === "FACT").length,
-      notasCredito: docs.filter((d) => d.TIPO === "N/CR").length,
-      totalCxC: docs.reduce((s, d) => s + (d.TOTAL ?? 0), 0),
-      porcentaje: (docs.reduce((s, d) => s + (d.TOTAL ?? 0), 0) / (totalCxCGlobal || 1)) * 100,
+    return Array.from(map.entries()).map(([name, docs]) => ({
+      name,
+      invoices: docs.filter((d) => d.TIPO === "FACT").length,
+      creditNotes: docs.filter((d) => d.TIPO === "N/CR").length,
+      receivables: docs.reduce((s, d) => s + (d.TOTAL ?? 0), 0),
+      percentage: (docs.reduce((s, d) => s + (d.TOTAL ?? 0), 0) / (globalTotal || 1)) * 100,
     }));
-  }, [filas, totalCxCGlobal]);
+  }, [filas, globalTotal]);
 
   // Agrupa por CLIENTE, ordena los grupos por RANGO (menor a mayor)
   // y calcula el subtotal de cada cliente: TOTAL tal cual, sumando todos los documentos.
   // Las N/CR ya vienen con signo negativo en el archivo del ERP, así que sumarlas
   // directamente ya las neta correctamente contra las FACT (no hay que restarlas aparte).
-  const grupos = useMemo<GrupoCliente[]>(() => {
-    const map = new Map<string, FilaData[]>();
-    for (const f of filasFiltradas) {
-      const cliente = f.CLIENTE ?? "SIN CLIENTE";
-      if (!map.has(cliente)) map.set(cliente, []);
-      map.get(cliente)!.push(f);
+  const groups = useMemo<ClientGroup[]>(() => {
+    const map = new Map<string, DataRow[]>();
+    for (const f of filteredRows) {
+      const client = f.CLIENTE ?? "SIN CLIENTE";
+      if (!map.has(client)) map.set(client, []);
+      map.get(client)!.push(f);
     }
 
-    const resultado = Array.from(map.entries()).map(([cliente, docs]) => {
-      const rangosValidos = docs
+    const result = Array.from(map.entries()).map(([client, docs]) => {
+      const validRanks = docs
         .map((d) => Number(d.RANGO))
         .filter((n) => Number.isFinite(n));
-      const rango = rangosValidos.length ? Math.min(...rangosValidos) : Infinity;
+      const rank = validRanks.length ? Math.min(...validRanks) : Infinity;
 
       const subtotal = docs.reduce((s, d) => s + (d.TOTAL ?? 0), 0);
 
-      return { cliente, rango, docs, subtotal };
+      return { client, rank, docs, subtotal };
     });
 
-    resultado.sort((a, b) => a.rango - b.rango);
-    return resultado;
-  }, [filasFiltradas]);
+    result.sort((a, b) => a.rank - b.rank);
+    return result;
+  }, [filteredRows]);
 
-  const totalGeneral = grupos.reduce((s, g) => s + g.subtotal, 0);
+  const grandTotal = groups.reduce((s, g) => s + g.subtotal, 0);
 
-  function eliminarData() {
+  function clearData() {
     setFilas([]);
     setNombreArchivo("");
     setCargadoEn(null);
   }
 
-  function eliminarDocumento(id: string) {
-    const restante = filas.filter((f) => f.id !== id);
-    const documentos: Documento[] = restante.map((f) => ({
-      TIPO: f.TIPO as TipoDocumento,
+  function deleteDocument(id: string) {
+    const remaining = filas.filter((f) => f.id !== id);
+    const documents: Document[] = remaining.map((f) => ({
+      TIPO: f.TIPO as DocumentType,
       NUMERO: f.NUMERO,
       EMISION: f.EMISION,
       VENCIMIENTO: f.VENCIMIENTO,
@@ -102,12 +102,12 @@ export default function Data() {
       TOTAL: f.TOTAL,
       CLIENTE: f.CLIENTE,
     }));
-    setFilas(filasDesdeRanking(rankearClientes(documentos)));
+    setFilas(rowsFromRanking(rankClients(documents)));
   }
 
-  function descargarData() {
-    const filasExport = grupos.flatMap((g) => g.docs);
-    const rows = filasExport.map((f) => ({
+  function downloadData() {
+    const exportRows = groups.flatMap((g) => g.docs);
+    const rows = exportRows.map((f) => ({
       RANGO: f.RANGO,
       CLIENTE: f.CLIENTE,
       TIPO: f.TIPO,
@@ -143,14 +143,14 @@ export default function Data() {
         </span>
         <div className="flex items-center gap-2">
           <button
-            onClick={eliminarData}
+            onClick={clearData}
             className="inline-flex items-center gap-2 rounded-md bg-red-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2"
           >
             <Trash2 className="h-4 w-4" />
             ELIMINAR
           </button>
           <button
-            onClick={descargarData}
+            onClick={downloadData}
             className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700"
           >
             <Download className="h-4 w-4" />
@@ -163,19 +163,19 @@ export default function Data() {
       <div className="grid shrink-0 grid-cols-2 gap-4 lg:grid-cols-3">
         <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
           <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Total Facturas</p>
-          <p className="mt-1 text-2xl font-semibold text-zinc-900">{totalFacturas}</p>
+          <p className="mt-1 text-2xl font-semibold text-zinc-900">{totalInvoices}</p>
         </div>
         <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
           <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Total Notas de Crédito</p>
-          <p className="mt-1 text-2xl font-semibold text-zinc-900">{totalNC}</p>
+          <p className="mt-1 text-2xl font-semibold text-zinc-900">{totalCreditNotes}</p>
         </div>
         <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
           <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Total Cuentas x Cobrar</p>
           <p className="mt-1 text-2xl font-semibold text-emerald-600">
-            {formatoMoneda(totalGeneral)}
+            {formatCurrency(grandTotal)}
             {selectedVendedor && (
               <span className="ml-2 text-sm font-normal text-zinc-500">
-                ({((totalGeneral / (totalCxCGlobal || 1)) * 100).toFixed(1)}%)
+                ({((grandTotal / (globalTotal || 1)) * 100).toFixed(1)}%)
               </span>
             )}
           </p>
@@ -194,18 +194,18 @@ export default function Data() {
         >
           Todos
         </button>
-        {vendedores.map((v) => (
+        {sellers.map((s) => (
           <button
-            key={v.vendedor}
-            onClick={() => setSelectedVendedor(v.vendedor)}
+            key={s.name}
+            onClick={() => setSelectedVendedor(s.name)}
             className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-              selectedVendedor === v.vendedor
+              selectedVendedor === s.name
                 ? "bg-zinc-900 text-white"
                 : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
             }`}
-            title={`Facturas: ${v.facturas} | N/C: ${v.notasCredito} | CxC: ${formatoMoneda(v.totalCxC)}`}
+            title={`Facturas: ${s.invoices} | N/C: ${s.creditNotes} | CxC: ${formatCurrency(s.receivables)}`}
           >
-            {v.vendedor} · {v.porcentaje.toFixed(1)}%
+            {s.name} · {s.percentage.toFixed(1)}%
           </button>
         ))}
       </div>
@@ -227,10 +227,10 @@ export default function Data() {
             </tr>
           </thead>
           <tbody>
-            {grupos.map((g) => (
-              <Fragment key={g.cliente}>
+            {groups.map((g) => (
+              <Fragment key={g.client}>
                 {g.docs.map((f, i) => (
-                  <tr key={`${g.cliente}-${i}`} className="border-b border-zinc-100 hover:bg-zinc-50">
+                  <tr key={`${g.client}-${i}`} className="border-b border-zinc-100 hover:bg-zinc-50">
                     <td className="px-4 py-2 text-zinc-700">{f.RANGO}</td>
                     <td className="px-4 py-2 text-zinc-700">{f.CLIENTE}</td>
                     <td className="px-4 py-2 text-zinc-700">{f.TIPO}</td>
@@ -240,10 +240,10 @@ export default function Data() {
                     <td className={`px-4 py-2 text-center ${f.MOROSIDAD >= 15 ? "text-red-600" : "text-zinc-700"}`}>
                       {f.MOROSIDAD}
                     </td>
-                    <td className="px-4 py-2 text-right text-zinc-700">{formatoMoneda(f.TOTAL ?? 0)}</td>
+                    <td className="px-4 py-2 text-right text-zinc-700">{formatCurrency(f.TOTAL ?? 0)}</td>
                     <td className="px-4 py-2">
                       <button
-                        onClick={() => eliminarDocumento(f.id)}
+                        onClick={() => deleteDocument(f.id)}
                         className="rounded p-1 text-zinc-400 transition hover:bg-red-50 hover:text-red-600"
                         aria-label="Eliminar documento"
                         title="Eliminar documento"
@@ -255,9 +255,9 @@ export default function Data() {
                 ))}
                 <tr className="border-b border-zinc-200 bg-zinc-100 font-medium">
                   <td colSpan={7} className="px-4 py-2 text-right text-zinc-700">
-                    Subtotal {g.cliente}
+                    Subtotal {g.client}
                   </td>
-                  <td className="px-4 py-2 text-right text-zinc-900">{formatoMoneda(g.subtotal)}</td>
+                  <td className="px-4 py-2 text-right text-zinc-900">{formatCurrency(g.subtotal)}</td>
                   <td />
                 </tr>
               </Fragment>
@@ -266,7 +266,7 @@ export default function Data() {
               <td colSpan={7} className="px-4 py-3 text-right">
                 TOTAL
               </td>
-              <td className="px-4 py-3 text-right">{formatoMoneda(totalGeneral)}</td>
+              <td className="px-4 py-3 text-right">{formatCurrency(grandTotal)}</td>
               <td />
             </tr>
           </tbody>

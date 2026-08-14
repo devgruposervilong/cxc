@@ -1,5 +1,5 @@
-export type Carga = {
+export type Upload = {
   id: string;
-  nombreArchivo: string;
-  cargadoEn: string;
+  fileName: string;
+  loadedAt: string;
 };

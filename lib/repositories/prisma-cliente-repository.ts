@@ -1,35 +1,35 @@
 import { prisma } from "@/lib/prisma";
 import type {
-  ClienteModel,
-  ClienteRepository,
-  CrearClienteInput,
+  ClientModel,
+  ClientRepository,
+  CreateClientInput,
 } from "@/lib/types";
 
-export class PrismaClienteRepository implements ClienteRepository {
-  async crearClientes(inputs: CrearClienteInput[]): Promise<ClienteModel[]> {
-    const creados: ClienteModel[] = [];
+export class PrismaClientRepository implements ClientRepository {
+  async createClients(inputs: CreateClientInput[]): Promise<ClientModel[]> {
+    const created: ClientModel[] = [];
     for (const input of inputs) {
       if (input.rif) {
-        const cliente = await prisma.cliente.upsert({
+        const client = await prisma.cliente.upsert({
           where: { rif: input.rif },
-          create: { rif: input.rif, nombre: input.nombre },
+          create: { rif: input.rif, nombre: input.name },
           update: {},
         });
-        creados.push({ id: cliente.id, rif: cliente.rif, nombre: cliente.nombre });
+        created.push({ id: client.id, rif: client.rif, name: client.nombre });
       } else {
-        const cliente = await prisma.cliente.create({
-          data: { rif: null, nombre: input.nombre },
+        const client = await prisma.cliente.create({
+          data: { rif: null, nombre: input.name },
         });
-        creados.push({ id: cliente.id, rif: cliente.rif, nombre: cliente.nombre });
+        created.push({ id: client.id, rif: client.rif, name: client.nombre });
       }
     }
-    return creados;
+    return created;
   }
 
-  async obtenerClientes(): Promise<ClienteModel[]> {
-    const clientes = await prisma.cliente.findMany({
+  async getClients(): Promise<ClientModel[]> {
+    const clients = await prisma.cliente.findMany({
       orderBy: { nombre: "asc" },
     });
-    return clientes.map((c) => ({ id: c.id, rif: c.rif, nombre: c.nombre }));
+    return clients.map((c) => ({ id: c.id, rif: c.rif, name: c.nombre }));
   }
 }

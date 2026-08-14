@@ -1,4 +1,4 @@
-export type FilaData = {
+export type DataRow = {
   id: string;
   RANGO: number;
   CLIENTE: string;

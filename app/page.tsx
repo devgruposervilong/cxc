@@ -2,13 +2,13 @@
 "use client";
 
 import { createContext, useContext, useState } from "react";
-import type { FilaData } from "@/lib/types";
-import CargarData from "./_components/cargar-data";
-import Data from "./_components/data";
+import type { DataRow } from "@/lib/types";
+import FileUpload from "./_components/file-upload";
+import DataView from "./_components/data-view";
 
 type PanelContextValue = {
-  filas: FilaData[];
-  setFilas: (filas: FilaData[]) => void;
+  filas: DataRow[];
+  setFilas: (filas: DataRow[]) => void;
   nombreArchivo: string;
   setNombreArchivo: (name: string) => void;
   cargadoEn: string | null;
@@ -24,7 +24,7 @@ export function usePanel() {
 }
 
 export default function Home() {
-  const [filas, setFilas] = useState<FilaData[]>([]);
+  const [filas, setFilas] = useState<DataRow[]>([]);
   const [nombreArchivo, setNombreArchivo] = useState("");
   const [cargadoEn, setCargadoEn] = useState<string | null>(null);
 
@@ -33,7 +33,7 @@ export default function Home() {
       value={{ filas, setFilas, nombreArchivo, setNombreArchivo, cargadoEn, setCargadoEn }}
     >
       <div className="flex h-full flex-col gap-4">
-        {filas.length === 0 ? <CargarData /> : <Data />}
+        {filas.length === 0 ? <FileUpload /> : <DataView />}
       </div>
     </PanelContext.Provider>
   );
