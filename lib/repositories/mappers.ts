@@ -1,4 +1,4 @@
-import type { DocumentModel, DocumentType, UploadModel } from "@/lib/types";
+import type { DataRow, DocumentType, UploadModel } from "@/lib/types";
 
 export function dbTypeToDomain(type: string): DocumentType {
   return type === "NCR" ? "N/CR" : "FACT";
@@ -9,44 +9,44 @@ export function domainTypeToDb(type: DocumentType): "FACT" | "NCR" {
 }
 
 type DocumentDbRow = {
-  id: string;
-  cargaId: string;
-  clienteId: string | null;
-  vendedorId: string | null;
-  tipo: string;
-  numero: string;
-  emision: string | null;
-  vencimiento: string | null;
-  morosidad: number;
+  rank: number;
+  client: string;
+  rif: string | null;
+  type: string;
+  number: string;
+  emission: string | null;
+  expiration: string | null;
+  overdueDays: number;
   total: { toNumber(): number } | null;
+  seller: string | null;
 };
 
-export function documentToModel(d: DocumentDbRow): DocumentModel {
+export function dbRowToDataRow(d: DocumentDbRow): DataRow {
   return {
-    id: d.id,
-    uploadId: d.cargaId,
-    clientId: d.clienteId,
-    sellerId: d.vendedorId,
-    type: dbTypeToDomain(d.tipo),
-    numero: d.numero,
-    emision: d.emision,
-    vencimiento: d.vencimiento,
-    morosidad: d.morosidad,
+    rank: d.rank,
+    client: d.client,
+    rif: d.rif,
+    type: dbTypeToDomain(d.type),
+    number: d.number,
+    emission: d.emission,
+    expiration: d.expiration,
+    overdueDays: d.overdueDays,
     total: d.total ? d.total.toNumber() : null,
+    seller: d.seller,
   };
 }
 
 type UploadDbRow = {
   id: string;
-  nombreArchivo: string;
-  cargadoEn: Date;
+  fileName: string;
+  loadedAt: Date;
 };
 
-export function uploadToModel(c: UploadDbRow): UploadModel {
+export function uploadToModel(u: UploadDbRow): UploadModel {
   return {
-    id: c.id,
-    fileName: c.nombreArchivo,
-    loadedAt: c.cargadoEn.toISOString(),
+    id: u.id,
+    fileName: u.fileName,
+    loadedAt: u.loadedAt.toISOString(),
   };
 }
 

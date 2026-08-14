@@ -1,6 +1,6 @@
 import * as XLSX from "xlsx";
-import { rankClients } from "@/lib/clientes";
-import type { DataRow, Document, DocumentType, RankedClient } from "@/lib/types";
+import { rankRows } from "@/lib/ranking";
+import type { DataRow, DocumentType } from "@/lib/types";
 
 const COLUMN_NAMES = [
   "TIPO", "NUMERO", "EMISION", "VENCIMIENTO", "OBSERVACION",
@@ -14,7 +14,7 @@ const IGNORED_TIPOS = [
   "Totales del Cliente:",
 ];
 
-const VENDEDORES: Record<string, string> = {
+const SELLERS: Record<string, string> = {
   "000046": "SUGEIDY",
   "000065": "SOL",
   "000077": "ADRIANA",
@@ -57,64 +57,51 @@ function toNumber(value: unknown): number | null {
   return isNaN(num) ? null : num;
 }
 
-function cleanDocument(row: Record<string, unknown>, today: Date) {
-  const {
-    MONEDA, TASA_1, TASA_2, VACIO_1, VACIO_2, SALDO, OBSERVACION, COD_VENDEDOR, ...rest
-  } = row;
-  const sellerCode = String(COD_VENDEDOR ?? "").trim();
-  const vendedor = VENDEDORES[sellerCode] ?? null;
-  const tipo = String(rest.TIPO ?? "").trim();
-  const isInvoice = tipo === "FACT" || tipo === "Factura";
-  let morosidad = 0;
-  if (isInvoice) {
-    const vencimiento = serialToDate(rest.VENCIMIENTO);
-    if (vencimiento) {
-      morosidad = Math.floor((today.getTime() - vencimiento.getTime()) / (1000 * 60 * 60 * 24));
+function cleanRow(row: Record<string, unknown>, today: Date) {
+  const sellerCode = String(row.COD_VENDEDOR ?? "").trim();
+  const seller = SELLERS[sellerCode] ?? null;
+  const type = String(row.TIPO ?? "").trim() as DocumentType;
+
+  let overdueDays = 0;
+  if (type === "FACT") {
+    const expiration = serialToDate(row.VENCIMIENTO);
+    if (expiration) {
+      overdueDays = Math.floor(
+        (today.getTime() - expiration.getTime()) / (1000 * 60 * 60 * 24)
+      );
     }
     // Las facturas aún no vencidas tendrían morosidad negativa (-1, -2, ...).
     // Se lleva a cero para que en la tabla todas las facturas aparezcan antes
     // que las notas de crédito.
-    morosidad = Math.max(0, morosidad);
+    overdueDays = Math.max(0, overdueDays);
   }
+
   return {
-    ...rest,
-    TIPO: tipo as DocumentType,
-    NUMERO: String(rest.NUMERO ?? ""),
-    EMISION: serialToDateString(rest.EMISION),
-    VENCIMIENTO: serialToDateString(rest.VENCIMIENTO),
-    VENDEDOR: vendedor,
-    RIF_CLIENTE: extractRif(OBSERVACION),
-    TOTAL: toNumber(rest.TOTAL),
-    MOROSIDAD: morosidad,
-    CLIENTE: null,
+    type,
+    number: String(row.NUMERO ?? ""),
+    emission: serialToDateString(row.EMISION),
+    expiration: serialToDateString(row.VENCIMIENTO),
+    overdueDays,
+    total: toNumber(row.TOTAL),
+    seller,
+    rif: extractRif(row.OBSERVACION),
   };
 }
 
-// Aplana el ranking de clientes en las filas que muestra la tabla, asignando
-// el RANGO (1..n) y un id único por documento.
-export function rowsFromRanking(rankedClients: RankedClient[]): DataRow[] {
-  const rows: DataRow[] = [];
-  let seq = 0;
-  for (let i = 0; i < rankedClients.length; i++) {
-    const rankedClient = rankedClients[i];
-    for (const doc of rankedClient.documents) {
-      rows.push({
-        id: `doc-${seq++}`,
-        RANGO: i + 1,
-        CLIENTE: rankedClient.name,
-        TIPO: doc.TIPO,
-        NUMERO: doc.NUMERO,
-        EMISION: doc.EMISION,
-        VENCIMIENTO: doc.VENCIMIENTO,
-        MOROSIDAD: doc.MOROSIDAD,
-        TOTAL: doc.TOTAL,
-        VENDEDOR: doc.VENDEDOR,
-      });
-    }
+// Las filas "cliente" del archivo traen el RIF en TIPO y el nombre en NUMERO.
+function buildClientMap(data: Record<string, unknown>[]): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const row of data) {
+    if (IGNORED_TIPOS.includes(String(row.TIPO ?? "").trim())) continue;
+    const rif = String(row.TIPO ?? "").trim();
+    const name = String(row.NUMERO ?? "").trim();
+    if (rif && name) map.set(rif.slice(1), name);
   }
-  return rows;
+  return map;
 }
 
+// Fuente de verdad de la app: retorna las filas ya limpias y ranqueadas.
+// Ese DataRow[] es lo que se muestra en la tabla, se exporta y viaja a la BD.
 export async function processFile(file: File): Promise<DataRow[]> {
   const buffer = await file.arrayBuffer();
   const workbook = XLSX.read(buffer, { type: "array" });
@@ -125,33 +112,20 @@ export async function processFile(file: File): Promise<DataRow[]> {
     defval: null,
   });
 
-  const invoices = data.filter((row) => row.TIPO === "FACT");
-  const creditNotes = data.filter((row) => row.TIPO === "N/CR");
-  const clients = data.filter((row) => !IGNORED_TIPOS.includes(row.TIPO as string));
-
   const today = new Date();
-  const cleanedInvoices = invoices.map((row) => cleanDocument(row, today)) as Document[];
-  const cleanedCreditNotes = creditNotes.map((row) => cleanDocument(row, today)) as Document[];
+  const clientMap = buildClientMap(data);
+  const documentRows = data.filter(
+    (row) => row.TIPO === "FACT" || row.TIPO === "N/CR"
+  );
 
-  const joinMap = new Map<string, string>();
-  for (const row of clients) {
-    const rif = String(row.TIPO ?? "").trim();
-    const name = String(row.NUMERO ?? "").trim();
-    if (rif && name) {
-      joinMap.set(rif.slice(1), name);
-    }
-  }
+  const rows: DataRow[] = documentRows.map((row) => {
+    const cleaned = cleanRow(row, today);
+    return {
+      ...cleaned,
+      rank: 0,
+      client: cleaned.rif ? clientMap.get(cleaned.rif.slice(1)) ?? null : null,
+    };
+  });
 
-  function assignClient(doc: Document): Document {
-    const rif = doc.RIF_CLIENTE ?? "";
-    return { ...doc, CLIENTE: joinMap.get(rif.slice(1)) ?? null };
-  }
-
-  const invoicesWithClient = cleanedInvoices.map(assignClient);
-  const creditNotesWithClient = cleanedCreditNotes.map(assignClient);
-
-  const allDocuments = [...invoicesWithClient, ...creditNotesWithClient];
-  const rankedClients = rankClients(allDocuments);
-
-  return rowsFromRanking(rankedClients);
+  return rankRows(rows);
 }

@@ -31,8 +31,8 @@ export * from "./enums"
  * const prisma = new PrismaClient({
  *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
  * })
- * // Fetch zero or more Cargas
- * const cargas = await prisma.carga.findMany()
+ * // Fetch zero or more Uploads
+ * const uploads = await prisma.upload.findMany()
  * ```
  * 
  * Read more in our [docs](https://pris.ly/d/client).
@@ -42,22 +42,12 @@ export type PrismaClient<LogOpts extends Prisma.LogLevel = never, OmitOpts exten
 export { Prisma }
 
 /**
- * Model Carga
+ * Model Upload
  * 
  */
-export type Carga = Prisma.CargaModel
+export type Upload = Prisma.UploadModel
 /**
- * Model Cliente
+ * Model Document
  * 
  */
-export type Cliente = Prisma.ClienteModel
-/**
- * Model Vendedor
- * 
- */
-export type Vendedor = Prisma.VendedorModel
-/**
- * Model Documento
- * 
- */
-export type Documento = Prisma.DocumentoModel
+export type Document = Prisma.DocumentModel

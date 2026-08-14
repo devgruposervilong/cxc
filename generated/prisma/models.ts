@@ -8,8 +8,6 @@
  *
  * 🟢 You can import this file directly.
  */
-export type * from './models/Carga'
-export type * from './models/Cliente'
-export type * from './models/Vendedor'
-export type * from './models/Documento'
+export type * from './models/Upload'
+export type * from './models/Document'
 export type * from './commonInputTypes'

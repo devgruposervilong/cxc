@@ -9,9 +9,9 @@
 * 🟢 You can import this file directly.
 */
 
-export const TipoDocumento = {
+export const DocumentType = {
   FACT: 'FACT',
   NCR: 'NCR'
 } as const
 
-export type TipoDocumento = (typeof TipoDocumento)[keyof typeof TipoDocumento]
+export type DocumentType = (typeof DocumentType)[keyof typeof DocumentType]

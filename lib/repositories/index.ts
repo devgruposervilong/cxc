@@ -1,4 +1,2 @@
-export * from "./prisma-carga-repository";
-export * from "./prisma-cliente-repository";
-export * from "./prisma-vendedor-repository";
-export * from "./prisma-documento-repository";
+export * from "./prisma-upload-repository";
+export * from "./prisma-document-repository";

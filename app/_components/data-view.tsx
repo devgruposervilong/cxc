@@ -3,9 +3,8 @@
 
 import { Fragment, useMemo, useState } from "react";
 import { usePanel } from "../page";
-import { rowsFromRanking } from "@/lib/process-file";
-import { rankClients } from "@/lib/clientes";
-import type { DataRow, Document, DocumentType } from "@/lib/types";
+import { rankRows } from "@/lib/ranking";
+import type { DataRow, DocumentType } from "@/lib/types";
 import * as XLSX from "xlsx";
 import { Download, Trash2 } from "lucide-react";
 
@@ -31,48 +30,48 @@ export default function DataView() {
 
   const filteredRows = useMemo(() => {
     if (!selectedVendedor) return filas;
-    return filas.filter((f) => f.VENDEDOR === selectedVendedor);
+    return filas.filter((f) => f.seller === selectedVendedor);
   }, [filas, selectedVendedor]);
 
-  const totalInvoices = filteredRows.filter((f) => f.TIPO === "FACT").length;
-  const totalCreditNotes = filteredRows.filter((f) => f.TIPO === "N/CR").length;
-  const globalTotal = filas.reduce((s, f) => s + (f.TOTAL ?? 0), 0);
+  const totalInvoices = filteredRows.filter((f) => f.type === "FACT").length;
+  const totalCreditNotes = filteredRows.filter((f) => f.type === "N/CR").length;
+  const globalTotal = filas.reduce((s, f) => s + (f.total ?? 0), 0);
 
   const sellers = useMemo(() => {
     const map = new Map<string, DataRow[]>();
     for (const f of filas) {
-      const v = f.VENDEDOR ?? "SIN VENDEDOR";
+      const v = f.seller ?? "SIN VENDEDOR";
       if (!map.has(v)) map.set(v, []);
       map.get(v)!.push(f);
     }
     return Array.from(map.entries()).map(([name, docs]) => ({
       name,
-      invoices: docs.filter((d) => d.TIPO === "FACT").length,
-      creditNotes: docs.filter((d) => d.TIPO === "N/CR").length,
-      receivables: docs.reduce((s, d) => s + (d.TOTAL ?? 0), 0),
-      percentage: (docs.reduce((s, d) => s + (d.TOTAL ?? 0), 0) / (globalTotal || 1)) * 100,
+      invoices: docs.filter((d) => d.type === "FACT").length,
+      creditNotes: docs.filter((d) => d.type === "N/CR").length,
+      receivables: docs.reduce((s, d) => s + (d.total ?? 0), 0),
+      percentage: (docs.reduce((s, d) => s + (d.total ?? 0), 0) / (globalTotal || 1)) * 100,
     }));
   }, [filas, globalTotal]);
 
-  // Agrupa por CLIENTE, ordena los grupos por RANGO (menor a mayor)
+  // Agrupa por cliente, ordena los grupos por RANGO (menor a mayor)
   // y calcula el subtotal de cada cliente: TOTAL tal cual, sumando todos los documentos.
   // Las N/CR ya vienen con signo negativo en el archivo del ERP, así que sumarlas
   // directamente ya las neta correctamente contra las FACT (no hay que restarlas aparte).
   const groups = useMemo<ClientGroup[]>(() => {
     const map = new Map<string, DataRow[]>();
     for (const f of filteredRows) {
-      const client = f.CLIENTE ?? "SIN CLIENTE";
+      const client = f.client ?? "SIN CLIENTE";
       if (!map.has(client)) map.set(client, []);
       map.get(client)!.push(f);
     }
 
     const result = Array.from(map.entries()).map(([client, docs]) => {
       const validRanks = docs
-        .map((d) => Number(d.RANGO))
+        .map((d) => Number(d.rank))
         .filter((n) => Number.isFinite(n));
       const rank = validRanks.length ? Math.min(...validRanks) : Infinity;
 
-      const subtotal = docs.reduce((s, d) => s + (d.TOTAL ?? 0), 0);
+      const subtotal = docs.reduce((s, d) => s + (d.total ?? 0), 0);
 
       return { client, rank, docs, subtotal };
     });
@@ -89,34 +88,25 @@ export default function DataView() {
     setCargadoEn(null);
   }
 
-  function deleteDocument(id: string) {
-    const remaining = filas.filter((f) => f.id !== id);
-    const documents: Document[] = remaining.map((f) => ({
-      TIPO: f.TIPO as DocumentType,
-      NUMERO: f.NUMERO,
-      EMISION: f.EMISION,
-      VENCIMIENTO: f.VENCIMIENTO,
-      MOROSIDAD: f.MOROSIDAD,
-      VENDEDOR: f.VENDEDOR,
-      RIF_CLIENTE: null,
-      TOTAL: f.TOTAL,
-      CLIENTE: f.CLIENTE,
-    }));
-    setFilas(rowsFromRanking(rankClients(documents)));
+  function deleteDocument(type: DocumentType, numero: string) {
+    const remaining = filas.filter(
+      (f) => !(f.type === type && f.number === numero)
+    );
+    setFilas(rankRows(remaining));
   }
 
   function downloadData() {
     const exportRows = groups.flatMap((g) => g.docs);
     const rows = exportRows.map((f) => ({
-      RANGO: f.RANGO,
-      CLIENTE: f.CLIENTE,
-      TIPO: f.TIPO,
-      NUMERO: f.NUMERO,
-      EMISION: f.EMISION,
-      VENCIMIENTO: f.VENCIMIENTO,
-      MOROSIDAD: f.MOROSIDAD,
-      TOTAL: f.TOTAL,
-      VENDEDOR: f.VENDEDOR,
+      RANGO: f.rank,
+      CLIENTE: f.client,
+      TIPO: f.type,
+      NUMERO: f.number,
+      EMISION: f.emission,
+      VENCIMIENTO: f.expiration,
+      MOROSIDAD: f.overdueDays,
+      TOTAL: f.total,
+      VENDEDOR: f.seller,
     }));
 
     const ws = XLSX.utils.json_to_sheet(rows, {
@@ -231,19 +221,19 @@ export default function DataView() {
               <Fragment key={g.client}>
                 {g.docs.map((f, i) => (
                   <tr key={`${g.client}-${i}`} className="border-b border-zinc-100 hover:bg-zinc-50">
-                    <td className="px-4 py-2 text-zinc-700">{f.RANGO}</td>
-                    <td className="px-4 py-2 text-zinc-700">{f.CLIENTE}</td>
-                    <td className="px-4 py-2 text-zinc-700">{f.TIPO}</td>
-                    <td className="px-4 py-2 text-zinc-700">{String(f.NUMERO ?? "")}</td>
-                    <td className="px-4 py-2 text-zinc-700">{f.EMISION}</td>
-                    <td className="px-4 py-2 text-zinc-700">{f.VENCIMIENTO}</td>
-                    <td className={`px-4 py-2 text-center ${f.MOROSIDAD >= 15 ? "text-red-600" : "text-zinc-700"}`}>
-                      {f.MOROSIDAD}
+                    <td className="px-4 py-2 text-zinc-700">{f.rank}</td>
+                    <td className="px-4 py-2 text-zinc-700">{f.client}</td>
+                    <td className="px-4 py-2 text-zinc-700">{f.type}</td>
+                    <td className="px-4 py-2 text-zinc-700">{f.number}</td>
+                    <td className="px-4 py-2 text-zinc-700">{f.emission}</td>
+                    <td className="px-4 py-2 text-zinc-700">{f.expiration}</td>
+                    <td className={`px-4 py-2 text-center ${f.overdueDays >= 15 ? "text-red-600" : "text-zinc-700"}`}>
+                      {f.overdueDays}
                     </td>
-                    <td className="px-4 py-2 text-right text-zinc-700">{formatCurrency(f.TOTAL ?? 0)}</td>
+                    <td className="px-4 py-2 text-right text-zinc-700">{formatCurrency(f.total ?? 0)}</td>
                     <td className="px-4 py-2">
                       <button
-                        onClick={() => deleteDocument(f.id)}
+                        onClick={() => deleteDocument(f.type, f.number)}
                         className="rounded p-1 text-zinc-400 transition hover:bg-red-50 hover:text-red-600"
                         aria-label="Eliminar documento"
                         title="Eliminar documento"

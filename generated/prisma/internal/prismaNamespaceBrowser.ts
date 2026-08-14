@@ -51,10 +51,8 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
-  Carga: 'Carga',
-  Cliente: 'Cliente',
-  Vendedor: 'Vendedor',
-  Documento: 'Documento'
+  Upload: 'Upload',
+  Document: 'Document'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -73,47 +71,31 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
-export const CargaScalarFieldEnum = {
+export const UploadScalarFieldEnum = {
   id: 'id',
-  nombreArchivo: 'nombreArchivo',
-  cargadoEn: 'cargadoEn'
+  fileName: 'fileName',
+  loadedAt: 'loadedAt'
 } as const
 
-export type CargaScalarFieldEnum = (typeof CargaScalarFieldEnum)[keyof typeof CargaScalarFieldEnum]
+export type UploadScalarFieldEnum = (typeof UploadScalarFieldEnum)[keyof typeof UploadScalarFieldEnum]
 
 
-export const ClienteScalarFieldEnum = {
+export const DocumentScalarFieldEnum = {
   id: 'id',
+  uploadId: 'uploadId',
+  rank: 'rank',
+  client: 'client',
   rif: 'rif',
-  nombre: 'nombre'
+  type: 'type',
+  number: 'number',
+  emission: 'emission',
+  expiration: 'expiration',
+  overdueDays: 'overdueDays',
+  total: 'total',
+  seller: 'seller'
 } as const
 
-export type ClienteScalarFieldEnum = (typeof ClienteScalarFieldEnum)[keyof typeof ClienteScalarFieldEnum]
-
-
-export const VendedorScalarFieldEnum = {
-  id: 'id',
-  codigo: 'codigo',
-  nombre: 'nombre'
-} as const
-
-export type VendedorScalarFieldEnum = (typeof VendedorScalarFieldEnum)[keyof typeof VendedorScalarFieldEnum]
-
-
-export const DocumentoScalarFieldEnum = {
-  id: 'id',
-  cargaId: 'cargaId',
-  clienteId: 'clienteId',
-  vendedorId: 'vendedorId',
-  tipo: 'tipo',
-  numero: 'numero',
-  emision: 'emision',
-  vencimiento: 'vencimiento',
-  morosidad: 'morosidad',
-  total: 'total'
-} as const
-
-export type DocumentoScalarFieldEnum = (typeof DocumentoScalarFieldEnum)[keyof typeof DocumentoScalarFieldEnum]
+export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
 
 
 export const SortOrder = {

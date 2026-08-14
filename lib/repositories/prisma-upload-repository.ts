@@ -8,30 +8,30 @@ import { parseLoadedAt, uploadToModel } from "./mappers";
 
 export class PrismaUploadRepository implements UploadRepository {
   async createUpload(input: CreateUploadInput): Promise<UploadModel> {
-    const upload = await prisma.carga.create({
+    const upload = await prisma.upload.create({
       data: {
-        nombreArchivo: input.fileName,
-        cargadoEn: parseLoadedAt(input.loadedAt),
+        fileName: input.fileName,
+        loadedAt: parseLoadedAt(input.loadedAt),
       },
     });
     return uploadToModel(upload);
   }
 
   async getUploads(): Promise<UploadModel[]> {
-    const uploads = await prisma.carga.findMany({
-      orderBy: { cargadoEn: "desc" },
+    const uploads = await prisma.upload.findMany({
+      orderBy: { loadedAt: "desc" },
     });
     return uploads.map(uploadToModel);
   }
 
   async getLatestUpload(): Promise<UploadModel | null> {
-    const upload = await prisma.carga.findFirst({
-      orderBy: { cargadoEn: "desc" },
+    const upload = await prisma.upload.findFirst({
+      orderBy: { loadedAt: "desc" },
     });
     return upload ? uploadToModel(upload) : null;
   }
 
   async deleteUpload(id: string): Promise<void> {
-    await prisma.carga.delete({ where: { id } });
+    await prisma.upload.delete({ where: { id } });
   }
 }
