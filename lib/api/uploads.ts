@@ -26,3 +26,14 @@ export async function saveUpload(input: SaveUploadInput): Promise<SaveUploadResu
 
   return (await response.json()) as SaveUploadResult;
 }
+
+export async function deleteUpload(id: string): Promise<void> {
+  const response = await fetch(`/api/uploads/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    const detail = (await response.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(detail?.error ?? "Error al eliminar la carga");
+  }
+}

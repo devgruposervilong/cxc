@@ -4,7 +4,7 @@
 import { Fragment, useMemo, useState } from "react";
 import { usePanel } from "../page";
 import { rankRows } from "@/lib/ranking";
-import { saveUpload } from "@/lib/api/uploads";
+import { saveUpload, deleteUpload } from "@/lib/api/uploads";
 import type { DataRow, DocumentType } from "@/lib/types";
 import * as XLSX from "xlsx";
 import { Database, Download, Trash2 } from "lucide-react";
@@ -25,10 +25,11 @@ function formatCurrency(valor: number) {
 }
 
 export default function DataView() {
-  const { filas, nombreArchivo, cargadoEn, setFilas, setNombreArchivo, setCargadoEn } =
+  const { filas, nombreArchivo, cargadoEn, setFilas, setNombreArchivo, setCargadoEn, uploadId, setUploadId } =
     usePanel();
   const [selectedVendedor, setSelectedVendedor] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [saveStatus, setSaveStatus] = useState<{ text: string; ok: boolean } | null>(null);
 
   const filteredRows = useMemo(() => {
@@ -89,6 +90,7 @@ export default function DataView() {
     setFilas([]);
     setNombreArchivo("");
     setCargadoEn(null);
+    setUploadId(null);
   }
 
   function deleteDocument(type: DocumentType, numero: string) {
@@ -137,6 +139,7 @@ export default function DataView() {
         loadedAt: cargadoEn,
         rows: filas,
       });
+      setUploadId(result.uploadId);
       setSaveStatus({ text: `Guardado: ${result.savedRows} documentos`, ok: true });
     } catch (error) {
       setSaveStatus({
@@ -145,6 +148,27 @@ export default function DataView() {
       });
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleDeleteAll() {
+    if (!uploadId) {
+      clearData();
+      return;
+    }
+    setDeleting(true);
+    setSaveStatus(null);
+    try {
+      await deleteUpload(uploadId);
+      clearData();
+      setSaveStatus({ text: "Carga eliminada", ok: true });
+    } catch (error) {
+      setSaveStatus({
+        text: error instanceof Error ? error.message : "Error al eliminar",
+        ok: false,
+      });
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -170,11 +194,12 @@ export default function DataView() {
             {saving ? "GUARDANDO..." : "GUARDAR"}
           </button>
           <button
-            onClick={clearData}
-            className="inline-flex items-center gap-2 rounded-md bg-red-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2"
+            onClick={handleDeleteAll}
+            disabled={deleting}
+            className="inline-flex items-center gap-2 rounded-md bg-red-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2"
           >
             <Trash2 className="h-4 w-4" />
-            ELIMINAR
+            {deleting ? "ELIMINANDO..." : "ELIMINAR"}
           </button>
           <button
             onClick={downloadData}

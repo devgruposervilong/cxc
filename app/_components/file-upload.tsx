@@ -7,7 +7,7 @@ import { processFile } from "@/lib/process-file";
 import { Upload } from "lucide-react";
 
 export default function FileUpload() {
-  const { setFilas, setNombreArchivo, nombreArchivo, setCargadoEn } = usePanel();
+  const { setFilas, setNombreArchivo, nombreArchivo, setCargadoEn, setUploadId } = usePanel();
   const [dragOver, setDragOver] = useState(false);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -18,6 +18,7 @@ export default function FileUpload() {
     try {
       const rows = await processFile(file);
       setFilas(rows);
+      setUploadId(null);
       const ahora = new Date();
       const dia = String(ahora.getDate()).padStart(2, "0");
       const mes = String(ahora.getMonth() + 1).padStart(2, "0");

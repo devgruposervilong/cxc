@@ -31,7 +31,8 @@ export class PrismaUploadRepository implements UploadRepository {
     return upload ? uploadToModel(upload) : null;
   }
 
-  async deleteUpload(id: string): Promise<void> {
-    await prisma.upload.delete({ where: { id } });
+  async deleteUpload(id: string): Promise<boolean> {
+    const result = await prisma.upload.deleteMany({ where: { id } });
+    return result.count > 0;
   }
 }

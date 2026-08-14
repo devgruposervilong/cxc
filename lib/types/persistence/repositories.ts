@@ -10,7 +10,7 @@ export interface UploadRepository {
   createUpload(input: CreateUploadInput): Promise<UploadModel>;
   getUploads(): Promise<UploadModel[]>;
   getLatestUpload(): Promise<UploadModel | null>;
-  deleteUpload(id: string): Promise<void>;
+  deleteUpload(id: string): Promise<boolean>;
 }
 
 export interface DocumentRepository {

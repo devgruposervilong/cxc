@@ -13,6 +13,8 @@ type PanelContextValue = {
   setNombreArchivo: (name: string) => void;
   cargadoEn: string | null;
   setCargadoEn: (cuando: string | null) => void;
+  uploadId: string | null;
+  setUploadId: (id: string | null) => void;
 };
 
 const PanelContext = createContext<PanelContextValue | null>(null);
@@ -27,10 +29,11 @@ export default function Home() {
   const [filas, setFilas] = useState<DataRow[]>([]);
   const [nombreArchivo, setNombreArchivo] = useState("");
   const [cargadoEn, setCargadoEn] = useState<string | null>(null);
+  const [uploadId, setUploadId] = useState<string | null>(null);
 
   return (
     <PanelContext.Provider
-      value={{ filas, setFilas, nombreArchivo, setNombreArchivo, cargadoEn, setCargadoEn }}
+      value={{ filas, setFilas, nombreArchivo, setNombreArchivo, cargadoEn, setCargadoEn, uploadId, setUploadId }}
     >
       <div className="flex h-full flex-col gap-4">
         {filas.length === 0 ? <FileUpload /> : <DataView />}

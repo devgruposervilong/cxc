@@ -34,3 +34,9 @@ export async function persistUpload(input: PersistUploadInput): Promise<PersistU
 
   return { uploadId: upload.id, savedRows: input.rows.length };
 }
+
+// Borra la carga y, por cascade (onDelete: Cascade), todos sus documentos.
+// Devuelve false si la carga no existía.
+export async function deleteUploadById(id: string): Promise<boolean> {
+  return uploadRepository.deleteUpload(id);
+}
