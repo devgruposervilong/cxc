@@ -16,7 +16,6 @@ type DocumentDbRow = {
   number: string;
   emission: string | null;
   expiration: string | null;
-  overdueDays: number;
   total: { toNumber(): number } | null;
   seller: string | null;
 };
@@ -30,7 +29,8 @@ export function dbRowToDataRow(d: DocumentDbRow): DataRow {
     number: d.number,
     emission: d.emission,
     expiration: d.expiration,
-    overdueDays: d.overdueDays,
+    // Placeholder: la morosidad se recalcula en el cliente (refreshMorosidad).
+    overdueDays: 0,
     total: d.total ? d.total.toNumber() : null,
     seller: d.seller,
   };

@@ -4,6 +4,7 @@
 import { useRef, useState } from "react";
 import { usePanel } from "../page";
 import { processFile } from "@/lib/process-file";
+import { refreshMorosidad } from "@/lib/morosidad";
 import { Upload } from "lucide-react";
 
 export default function FileUpload() {
@@ -17,7 +18,7 @@ export default function FileUpload() {
     setNombreArchivo(file.name);
     try {
       const rows = await processFile(file);
-      setFilas(rows);
+      setFilas(refreshMorosidad(rows));
       setUploadId(null);
       const ahora = new Date();
       const dia = String(ahora.getDate()).padStart(2, "0");

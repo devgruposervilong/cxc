@@ -624,7 +624,6 @@ export const DocumentScalarFieldEnum = {
   number: 'number',
   emission: 'emission',
   expiration: 'expiration',
-  overdueDays: 'overdueDays',
   total: 'total',
   seller: 'seller'
 } as const

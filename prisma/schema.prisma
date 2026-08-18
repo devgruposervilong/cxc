@@ -37,7 +37,6 @@ model Document {
   number      String
   emission    String?
   expiration  String?
-  overdueDays Int
   total       Decimal?
   seller      String?
 

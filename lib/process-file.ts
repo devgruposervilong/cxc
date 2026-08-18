@@ -57,31 +57,19 @@ function toNumber(value: unknown): number | null {
   return isNaN(num) ? null : num;
 }
 
-function cleanRow(row: Record<string, unknown>, today: Date) {
+function cleanRow(row: Record<string, unknown>) {
   const sellerCode = String(row.COD_VENDEDOR ?? "").trim();
   const seller = SELLERS[sellerCode] ?? null;
   const type = String(row.TIPO ?? "").trim() as DocumentType;
-
-  let overdueDays = 0;
-  if (type === "FACT") {
-    const expiration = serialToDate(row.VENCIMIENTO);
-    if (expiration) {
-      overdueDays = Math.floor(
-        (today.getTime() - expiration.getTime()) / (1000 * 60 * 60 * 24)
-      );
-    }
-    // Las facturas aún no vencidas tendrían morosidad negativa (-1, -2, ...).
-    // Se lleva a cero para que en la tabla todas las facturas aparezcan antes
-    // que las notas de crédito.
-    overdueDays = Math.max(0, overdueDays);
-  }
 
   return {
     type,
     number: String(row.NUMERO ?? ""),
     emission: serialToDateString(row.EMISION),
     expiration: serialToDateString(row.VENCIMIENTO),
-    overdueDays,
+    // Placeholder: la morosidad real se recalcula en el cliente
+    // (refreshMorosidad) para que esté al día al renderizar.
+    overdueDays: 0,
     total: toNumber(row.TOTAL),
     seller,
     rif: extractRif(row.OBSERVACION),
@@ -112,14 +100,13 @@ export async function processFile(file: File): Promise<DataRow[]> {
     defval: null,
   });
 
-  const today = new Date();
   const clientMap = buildClientMap(data);
   const documentRows = data.filter(
     (row) => row.TIPO === "FACT" || row.TIPO === "N/CR"
   );
 
   const rows: DataRow[] = documentRows.map((row) => {
-    const cleaned = cleanRow(row, today);
+    const cleaned = cleanRow(row);
     return {
       ...cleaned,
       rank: 0,

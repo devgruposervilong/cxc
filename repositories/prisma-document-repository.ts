@@ -15,7 +15,6 @@ export class PrismaDocumentRepository implements DocumentRepository {
         number: row.number,
         emission: row.emission,
         expiration: row.expiration,
-        overdueDays: row.overdueDays,
         total: row.total,
         seller: row.seller,
       })),

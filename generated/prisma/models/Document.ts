@@ -28,13 +28,11 @@ export type AggregateDocument = {
 
 export type DocumentAvgAggregateOutputType = {
   rank: number | null
-  overdueDays: number | null
   total: runtime.Decimal | null
 }
 
 export type DocumentSumAggregateOutputType = {
   rank: number | null
-  overdueDays: number | null
   total: runtime.Decimal | null
 }
 
@@ -48,7 +46,6 @@ export type DocumentMinAggregateOutputType = {
   number: string | null
   emission: string | null
   expiration: string | null
-  overdueDays: number | null
   total: runtime.Decimal | null
   seller: string | null
 }
@@ -63,7 +60,6 @@ export type DocumentMaxAggregateOutputType = {
   number: string | null
   emission: string | null
   expiration: string | null
-  overdueDays: number | null
   total: runtime.Decimal | null
   seller: string | null
 }
@@ -78,7 +74,6 @@ export type DocumentCountAggregateOutputType = {
   number: number
   emission: number
   expiration: number
-  overdueDays: number
   total: number
   seller: number
   _all: number
@@ -87,13 +82,11 @@ export type DocumentCountAggregateOutputType = {
 
 export type DocumentAvgAggregateInputType = {
   rank?: true
-  overdueDays?: true
   total?: true
 }
 
 export type DocumentSumAggregateInputType = {
   rank?: true
-  overdueDays?: true
   total?: true
 }
 
@@ -107,7 +100,6 @@ export type DocumentMinAggregateInputType = {
   number?: true
   emission?: true
   expiration?: true
-  overdueDays?: true
   total?: true
   seller?: true
 }
@@ -122,7 +114,6 @@ export type DocumentMaxAggregateInputType = {
   number?: true
   emission?: true
   expiration?: true
-  overdueDays?: true
   total?: true
   seller?: true
 }
@@ -137,7 +128,6 @@ export type DocumentCountAggregateInputType = {
   number?: true
   emission?: true
   expiration?: true
-  overdueDays?: true
   total?: true
   seller?: true
   _all?: true
@@ -239,7 +229,6 @@ export type DocumentGroupByOutputType = {
   number: string
   emission: string | null
   expiration: string | null
-  overdueDays: number
   total: runtime.Decimal | null
   seller: string | null
   _count: DocumentCountAggregateOutputType | null
@@ -277,7 +266,6 @@ export type DocumentWhereInput = {
   number?: Prisma.StringFilter<"Document"> | string
   emission?: Prisma.StringNullableFilter<"Document"> | string | null
   expiration?: Prisma.StringNullableFilter<"Document"> | string | null
-  overdueDays?: Prisma.IntFilter<"Document"> | number
   total?: Prisma.DecimalNullableFilter<"Document"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   seller?: Prisma.StringNullableFilter<"Document"> | string | null
   upload?: Prisma.XOR<Prisma.UploadScalarRelationFilter, Prisma.UploadWhereInput>
@@ -293,7 +281,6 @@ export type DocumentOrderByWithRelationInput = {
   number?: Prisma.SortOrder
   emission?: Prisma.SortOrderInput | Prisma.SortOrder
   expiration?: Prisma.SortOrderInput | Prisma.SortOrder
-  overdueDays?: Prisma.SortOrder
   total?: Prisma.SortOrderInput | Prisma.SortOrder
   seller?: Prisma.SortOrderInput | Prisma.SortOrder
   upload?: Prisma.UploadOrderByWithRelationInput
@@ -312,7 +299,6 @@ export type DocumentWhereUniqueInput = Prisma.AtLeast<{
   number?: Prisma.StringFilter<"Document"> | string
   emission?: Prisma.StringNullableFilter<"Document"> | string | null
   expiration?: Prisma.StringNullableFilter<"Document"> | string | null
-  overdueDays?: Prisma.IntFilter<"Document"> | number
   total?: Prisma.DecimalNullableFilter<"Document"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   seller?: Prisma.StringNullableFilter<"Document"> | string | null
   upload?: Prisma.XOR<Prisma.UploadScalarRelationFilter, Prisma.UploadWhereInput>
@@ -328,7 +314,6 @@ export type DocumentOrderByWithAggregationInput = {
   number?: Prisma.SortOrder
   emission?: Prisma.SortOrderInput | Prisma.SortOrder
   expiration?: Prisma.SortOrderInput | Prisma.SortOrder
-  overdueDays?: Prisma.SortOrder
   total?: Prisma.SortOrderInput | Prisma.SortOrder
   seller?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.DocumentCountOrderByAggregateInput
@@ -351,7 +336,6 @@ export type DocumentScalarWhereWithAggregatesInput = {
   number?: Prisma.StringWithAggregatesFilter<"Document"> | string
   emission?: Prisma.StringNullableWithAggregatesFilter<"Document"> | string | null
   expiration?: Prisma.StringNullableWithAggregatesFilter<"Document"> | string | null
-  overdueDays?: Prisma.IntWithAggregatesFilter<"Document"> | number
   total?: Prisma.DecimalNullableWithAggregatesFilter<"Document"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   seller?: Prisma.StringNullableWithAggregatesFilter<"Document"> | string | null
 }
@@ -365,7 +349,6 @@ export type DocumentCreateInput = {
   number: string
   emission?: string | null
   expiration?: string | null
-  overdueDays: number
   total?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   seller?: string | null
   upload: Prisma.UploadCreateNestedOneWithoutDocumentsInput
@@ -381,7 +364,6 @@ export type DocumentUncheckedCreateInput = {
   number: string
   emission?: string | null
   expiration?: string | null
-  overdueDays: number
   total?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   seller?: string | null
 }
@@ -395,7 +377,6 @@ export type DocumentUpdateInput = {
   number?: Prisma.StringFieldUpdateOperationsInput | string
   emission?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   expiration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  overdueDays?: Prisma.IntFieldUpdateOperationsInput | number
   total?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   seller?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   upload?: Prisma.UploadUpdateOneRequiredWithoutDocumentsNestedInput
@@ -411,7 +392,6 @@ export type DocumentUncheckedUpdateInput = {
   number?: Prisma.StringFieldUpdateOperationsInput | string
   emission?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   expiration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  overdueDays?: Prisma.IntFieldUpdateOperationsInput | number
   total?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   seller?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -426,7 +406,6 @@ export type DocumentCreateManyInput = {
   number: string
   emission?: string | null
   expiration?: string | null
-  overdueDays: number
   total?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   seller?: string | null
 }
@@ -440,7 +419,6 @@ export type DocumentUpdateManyMutationInput = {
   number?: Prisma.StringFieldUpdateOperationsInput | string
   emission?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   expiration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  overdueDays?: Prisma.IntFieldUpdateOperationsInput | number
   total?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   seller?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -455,7 +433,6 @@ export type DocumentUncheckedUpdateManyInput = {
   number?: Prisma.StringFieldUpdateOperationsInput | string
   emission?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   expiration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  overdueDays?: Prisma.IntFieldUpdateOperationsInput | number
   total?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   seller?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -480,14 +457,12 @@ export type DocumentCountOrderByAggregateInput = {
   number?: Prisma.SortOrder
   emission?: Prisma.SortOrder
   expiration?: Prisma.SortOrder
-  overdueDays?: Prisma.SortOrder
   total?: Prisma.SortOrder
   seller?: Prisma.SortOrder
 }
 
 export type DocumentAvgOrderByAggregateInput = {
   rank?: Prisma.SortOrder
-  overdueDays?: Prisma.SortOrder
   total?: Prisma.SortOrder
 }
 
@@ -501,7 +476,6 @@ export type DocumentMaxOrderByAggregateInput = {
   number?: Prisma.SortOrder
   emission?: Prisma.SortOrder
   expiration?: Prisma.SortOrder
-  overdueDays?: Prisma.SortOrder
   total?: Prisma.SortOrder
   seller?: Prisma.SortOrder
 }
@@ -516,14 +490,12 @@ export type DocumentMinOrderByAggregateInput = {
   number?: Prisma.SortOrder
   emission?: Prisma.SortOrder
   expiration?: Prisma.SortOrder
-  overdueDays?: Prisma.SortOrder
   total?: Prisma.SortOrder
   seller?: Prisma.SortOrder
 }
 
 export type DocumentSumOrderByAggregateInput = {
   rank?: Prisma.SortOrder
-  overdueDays?: Prisma.SortOrder
   total?: Prisma.SortOrder
 }
 
@@ -602,7 +574,6 @@ export type DocumentCreateWithoutUploadInput = {
   number: string
   emission?: string | null
   expiration?: string | null
-  overdueDays: number
   total?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   seller?: string | null
 }
@@ -616,7 +587,6 @@ export type DocumentUncheckedCreateWithoutUploadInput = {
   number: string
   emission?: string | null
   expiration?: string | null
-  overdueDays: number
   total?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   seller?: string | null
 }
@@ -660,7 +630,6 @@ export type DocumentScalarWhereInput = {
   number?: Prisma.StringFilter<"Document"> | string
   emission?: Prisma.StringNullableFilter<"Document"> | string | null
   expiration?: Prisma.StringNullableFilter<"Document"> | string | null
-  overdueDays?: Prisma.IntFilter<"Document"> | number
   total?: Prisma.DecimalNullableFilter<"Document"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   seller?: Prisma.StringNullableFilter<"Document"> | string | null
 }
@@ -674,7 +643,6 @@ export type DocumentCreateManyUploadInput = {
   number: string
   emission?: string | null
   expiration?: string | null
-  overdueDays: number
   total?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   seller?: string | null
 }
@@ -688,7 +656,6 @@ export type DocumentUpdateWithoutUploadInput = {
   number?: Prisma.StringFieldUpdateOperationsInput | string
   emission?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   expiration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  overdueDays?: Prisma.IntFieldUpdateOperationsInput | number
   total?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   seller?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -702,7 +669,6 @@ export type DocumentUncheckedUpdateWithoutUploadInput = {
   number?: Prisma.StringFieldUpdateOperationsInput | string
   emission?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   expiration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  overdueDays?: Prisma.IntFieldUpdateOperationsInput | number
   total?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   seller?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -716,7 +682,6 @@ export type DocumentUncheckedUpdateManyWithoutUploadInput = {
   number?: Prisma.StringFieldUpdateOperationsInput | string
   emission?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   expiration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  overdueDays?: Prisma.IntFieldUpdateOperationsInput | number
   total?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   seller?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -733,7 +698,6 @@ export type DocumentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   number?: boolean
   emission?: boolean
   expiration?: boolean
-  overdueDays?: boolean
   total?: boolean
   seller?: boolean
   upload?: boolean | Prisma.UploadDefaultArgs<ExtArgs>
@@ -749,7 +713,6 @@ export type DocumentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   number?: boolean
   emission?: boolean
   expiration?: boolean
-  overdueDays?: boolean
   total?: boolean
   seller?: boolean
   upload?: boolean | Prisma.UploadDefaultArgs<ExtArgs>
@@ -765,7 +728,6 @@ export type DocumentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   number?: boolean
   emission?: boolean
   expiration?: boolean
-  overdueDays?: boolean
   total?: boolean
   seller?: boolean
   upload?: boolean | Prisma.UploadDefaultArgs<ExtArgs>
@@ -781,12 +743,11 @@ export type DocumentSelectScalar = {
   number?: boolean
   emission?: boolean
   expiration?: boolean
-  overdueDays?: boolean
   total?: boolean
   seller?: boolean
 }
 
-export type DocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "uploadId" | "rank" | "client" | "rif" | "type" | "number" | "emission" | "expiration" | "overdueDays" | "total" | "seller", ExtArgs["result"]["document"]>
+export type DocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "uploadId" | "rank" | "client" | "rif" | "type" | "number" | "emission" | "expiration" | "total" | "seller", ExtArgs["result"]["document"]>
 export type DocumentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   upload?: boolean | Prisma.UploadDefaultArgs<ExtArgs>
 }
@@ -812,7 +773,6 @@ export type $DocumentPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     number: string
     emission: string | null
     expiration: string | null
-    overdueDays: number
     total: runtime.Decimal | null
     seller: string | null
   }, ExtArgs["result"]["document"]>
@@ -1248,7 +1208,6 @@ export interface DocumentFieldRefs {
   readonly number: Prisma.FieldRef<"Document", 'String'>
   readonly emission: Prisma.FieldRef<"Document", 'String'>
   readonly expiration: Prisma.FieldRef<"Document", 'String'>
-  readonly overdueDays: Prisma.FieldRef<"Document", 'Int'>
   readonly total: Prisma.FieldRef<"Document", 'Decimal'>
   readonly seller: Prisma.FieldRef<"Document", 'String'>
 }

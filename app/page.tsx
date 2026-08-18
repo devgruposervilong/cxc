@@ -4,6 +4,7 @@
 import { createContext, useContext, useState } from "react";
 import type { DataRow } from "@/lib/types";
 import { useUploadData } from "@/lib/hooks/use-upload-data";
+import { refreshMorosidad } from "@/lib/morosidad";
 import FileUpload from "./_components/file-upload";
 import DataView from "./_components/data-view";
 
@@ -39,7 +40,7 @@ export default function Home() {
   // tabla con esos datos; si no, se muestra el componente de carga.
   if (!hydrated && !isPending) {
     if (data) {
-      setFilas(data.rows);
+      setFilas(refreshMorosidad(data.rows));
       setNombreArchivo(data.fileName);
       setCargadoEn(data.loadedAt);
       setUploadId(data.uploadId);
