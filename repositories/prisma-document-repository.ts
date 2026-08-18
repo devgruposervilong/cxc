@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import type { DataRow, DocumentRepository } from "@/lib/types";
+import type { DataRow, DocumentRepository, DocumentType } from "@/lib/types";
 import { dbRowToDataRow, domainTypeToDb } from "./mappers";
 
 export class PrismaDocumentRepository implements DocumentRepository {
@@ -31,5 +31,11 @@ export class PrismaDocumentRepository implements DocumentRepository {
 
   async deleteDocumentsByUpload(uploadId: string): Promise<void> {
     await prisma.document.deleteMany({ where: { uploadId } });
+  }
+
+  async deleteDocument(uploadId: string, type: DocumentType, number: string): Promise<void> {
+    await prisma.document.deleteMany({
+      where: { uploadId, type: domainTypeToDb(type), number },
+    });
   }
 }

@@ -1,4 +1,4 @@
-import type { DataRow } from "../application/data-row";
+import type { DataRow, DocumentType } from "../application/data-row";
 import type { UploadModel } from "./models";
 
 export type CreateUploadInput = {
@@ -16,5 +16,6 @@ export interface UploadRepository {
 export interface DocumentRepository {
   createDocuments(uploadId: string, rows: DataRow[]): Promise<void>;
   getDocumentsByUpload(uploadId: string): Promise<DataRow[]>;
+  deleteDocument(uploadId: string, type: DocumentType, number: string): Promise<void>;
   deleteDocumentsByUpload(uploadId: string): Promise<void>;
 }

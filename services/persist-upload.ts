@@ -1,6 +1,6 @@
 import { PrismaUploadRepository } from "@/repositories/prisma-upload-repository";
 import { PrismaDocumentRepository } from "@/repositories/prisma-document-repository";
-import type { DataRow } from "@/lib/types";
+import type { DataRow, DocumentType } from "@/lib/types";
 
 export type PersistUploadInput = {
   fileName: string;
@@ -33,6 +33,15 @@ export async function persistUpload(input: PersistUploadInput): Promise<PersistU
   }
 
   return { uploadId: upload.id, savedRows: input.rows.length };
+}
+
+// Borra un documento individual de una carga ya persistida.
+export async function deleteDocumentFromUpload(
+  uploadId: string,
+  type: DocumentType,
+  number: string
+): Promise<void> {
+  await documentRepository.deleteDocument(uploadId, type, number);
 }
 
 // Borra la carga y, por cascade (onDelete: Cascade), todos sus documentos.

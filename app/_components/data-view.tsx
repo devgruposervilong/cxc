@@ -5,7 +5,7 @@ import { Fragment, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePanel } from "../page";
 import { rankRows } from "@/lib/ranking";
-import { saveUpload, deleteUpload } from "@/lib/api/uploads";
+import { saveUpload, deleteUpload, deleteDocumentFromUpload } from "@/lib/api/uploads";
 import { UPLOAD_QUERY_KEY } from "@/lib/hooks/use-upload-data";
 import type { DataRow, DocumentType } from "@/lib/types";
 import * as XLSX from "xlsx";
@@ -96,11 +96,24 @@ export default function DataView() {
     setUploadId(null);
   }
 
-  function deleteDocument(type: DocumentType, numero: string) {
+  async function deleteDocument(type: DocumentType, numero: string) {
     const remaining = filas.filter(
       (f) => !(f.type === type && f.number === numero)
     );
     setFilas(rankRows(remaining));
+
+    // Si la carga ya está persistida, se borra también de la BD para que la
+    // descarga (y la recarga de la app) sigan excluyendo el documento.
+    if (!uploadId) return;
+    try {
+      await deleteDocumentFromUpload(uploadId, type, numero);
+      queryClient.invalidateQueries({ queryKey: UPLOAD_QUERY_KEY });
+    } catch (error) {
+      setSaveStatus({
+        text: error instanceof Error ? error.message : "Error al eliminar el documento",
+        ok: false,
+      });
+    }
   }
 
   function downloadData() {

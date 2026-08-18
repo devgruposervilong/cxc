@@ -1,4 +1,4 @@
-import type { DataRow } from "@/lib/types";
+import type { DataRow, DocumentType } from "@/lib/types";
 
 export type SaveUploadInput = {
   fileName: string;
@@ -66,5 +66,22 @@ export async function deleteUpload(id: string): Promise<void> {
   if (!response.ok) {
     const detail = (await response.json().catch(() => null)) as { error?: string } | null;
     throw new Error(detail?.error ?? "Error al eliminar la carga");
+  }
+}
+
+export async function deleteDocumentFromUpload(
+  uploadId: string,
+  type: DocumentType,
+  number: string
+): Promise<void> {
+  const response = await fetch(`/api/uploads/${uploadId}/documents`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type, number }),
+  });
+
+  if (!response.ok) {
+    const detail = (await response.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(detail?.error ?? "Error al eliminar el documento");
   }
 }
