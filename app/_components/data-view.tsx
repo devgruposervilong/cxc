@@ -5,7 +5,8 @@ import { Fragment, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePanel } from "../page";
 import { rankRows } from "@/lib/ranking";
-import { saveUpload, deleteUpload, deleteDocumentFromUpload } from "@/lib/api/uploads";
+import { refreshMorosidad } from "@/lib/morosidad";
+import { saveUpload, deleteUpload, deleteDocumentFromUpload, getLatestUpload } from "@/lib/api/uploads";
 import { UPLOAD_QUERY_KEY } from "@/lib/hooks/use-upload-data";
 import type { DataRow, DocumentType } from "@/lib/types";
 import * as XLSX from "xlsx";
@@ -128,15 +129,16 @@ export default function DataView() {
       MOROSIDAD: f.overdueDays,
       TOTAL: f.total,
       VENDEDOR: f.seller,
+      UNIDAD_NEGOCIO: f.businessUnit ?? "",
     }));
 
     const ws = XLSX.utils.json_to_sheet(rows, {
-      header: ["RANGO", "CLIENTE", "TIPO", "NUMERO", "EMISION", "VENCIMIENTO", "MOROSIDAD", "TOTAL", "VENDEDOR"],
+      header: ["RANGO", "CLIENTE", "TIPO", "NUMERO", "EMISION", "VENCIMIENTO", "MOROSIDAD", "TOTAL", "VENDEDOR", "UNIDAD_NEGOCIO"],
     });
 
     ws["!cols"] = [
       { wch: 6 }, { wch: 40 }, { wch: 6 }, { wch: 10 },
-      { wch: 12 }, { wch: 12 }, { wch: 10 }, { wch: 12 }, { wch: 14 },
+      { wch: 12 }, { wch: 12 }, { wch: 10 }, { wch: 12 }, { wch: 14 }, { wch: 16 },
     ];
 
     const wb = XLSX.utils.book_new();
@@ -156,6 +158,17 @@ export default function DataView() {
         rows: filas,
       });
       setUploadId(result.uploadId);
+
+      // Rehidrata la tabla desde la BD sin recargar la página: el GET devuelve
+      // las filas ya unidas al maestro (vendedor y unidad de negocio), de modo
+      // que lo que se muestra queda idéntico a lo que servirá la próxima carga.
+      const fresh = await getLatestUpload();
+      if (fresh && fresh.uploadId === result.uploadId) {
+        setFilas(refreshMorosidad(fresh.rows));
+        setNombreArchivo(fresh.fileName);
+        setCargadoEn(fresh.loadedAt);
+      }
+
       setSaveStatus({ text: `Guardado: ${result.savedRows} documentos`, ok: true });
       queryClient.invalidateQueries({ queryKey: UPLOAD_QUERY_KEY });
     } catch (error) {
@@ -205,11 +218,16 @@ export default function DataView() {
         <div className="flex items-center gap-2">
           <button
             onClick={saveToDb}
-            disabled={saving}
+            disabled={saving || uploadId !== null}
+            title={
+              uploadId
+                ? "Esta carga ya está guardada en la base de datos"
+                : undefined
+            }
             className="inline-flex items-center gap-2 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Database className="h-4 w-4" />
-            {saving ? "GUARDANDO..." : "GUARDAR"}
+            {saving ? "GUARDANDO..." : uploadId ? "YA GUARDADO" : "GUARDAR"}
           </button>
           <button
             onClick={handleDeleteAll}
