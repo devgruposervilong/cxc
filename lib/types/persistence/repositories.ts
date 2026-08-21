@@ -1,4 +1,5 @@
 import type { DataRow, DocumentType } from "../application/data-row";
+import type { Client } from "../application/client";
 import type { UploadModel } from "./models";
 
 export type CreateUploadInput = {
@@ -18,4 +19,9 @@ export interface DocumentRepository {
   getDocumentsByUpload(uploadId: string): Promise<DataRow[]>;
   deleteDocument(uploadId: string, type: DocumentType, number: string): Promise<void>;
   deleteDocumentsByUpload(uploadId: string): Promise<void>;
+}
+
+// Maestro de clientes: fuente de verdad de seller y businessUnit.
+export interface ClientRepository {
+  getClients(): Promise<Client[]>;
 }

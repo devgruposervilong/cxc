@@ -46,11 +46,12 @@ model Document {
   @@map("document")
 }
 
-// Tabla CLIENTES del ERP (CODIGO, CLIENTE, RIF, VENDEDOR, UNIDAD_NEGOCIO)
+// Tabla CLIENTES del ERP (CODIGO, CLIENTE, RIF, VENDEDOR, UNIDAD_NEGOCIO).
+// name es único: es la clave de unión con Document.client.
 model Client {
   id           String @id @default(cuid())
   code         String @unique
-  name         String
+  name         String @unique
   rif          String
   seller       String
   businessUnit String

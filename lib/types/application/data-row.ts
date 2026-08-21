@@ -14,4 +14,7 @@ export type DataRow = {
   overdueDays: number;
   total: number | null;
   seller: string | null;
+  // Unidad de negocio del maestro de clientes. No viene en el archivo CxC:
+  // se resuelve al leer (join por nombre contra Client) en load-upload.
+  businessUnit?: string | null;
 };

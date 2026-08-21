@@ -204,14 +204,14 @@ export type ClientOrderByWithRelationInput = {
 export type ClientWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   code?: string
+  name?: string
   AND?: Prisma.ClientWhereInput | Prisma.ClientWhereInput[]
   OR?: Prisma.ClientWhereInput[]
   NOT?: Prisma.ClientWhereInput | Prisma.ClientWhereInput[]
-  name?: Prisma.StringFilter<"Client"> | string
   rif?: Prisma.StringFilter<"Client"> | string
   seller?: Prisma.StringFilter<"Client"> | string
   businessUnit?: Prisma.StringFilter<"Client"> | string
-}, "id" | "code">
+}, "id" | "code" | "name">
 
 export type ClientOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
