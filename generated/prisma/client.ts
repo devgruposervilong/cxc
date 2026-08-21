@@ -51,3 +51,8 @@ export type Upload = Prisma.UploadModel
  * 
  */
 export type Document = Prisma.DocumentModel
+/**
+ * Model Client
+ * 
+ */
+export type Client = Prisma.ClientModel

@@ -45,3 +45,15 @@ model Document {
   @@index([uploadId])
   @@map("document")
 }
+
+// Tabla CLIENTES del ERP (CODIGO, CLIENTE, RIF, VENDEDOR, UNIDAD_NEGOCIO)
+model Client {
+  id           String @id @default(cuid())
+  code         String @unique
+  name         String
+  rif          String
+  seller       String
+  businessUnit String
+
+  @@map("client")
+}
