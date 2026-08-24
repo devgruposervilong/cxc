@@ -252,7 +252,13 @@ export default function DataView() {
           </button>
           <button
             onClick={downloadData}
-            className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700"
+            disabled={uploadId === null}
+            title={
+              uploadId
+                ? undefined
+                : "La descarga se habilita al guardar la data en la base de datos"
+            }
+            className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Download className="h-4 w-4" />
             DESCARGAR DATA
@@ -342,6 +348,7 @@ export default function DataView() {
               <th className="px-4 py-3 font-semibold">EMISION</th>
               <th className="px-4 py-3 font-semibold">VENCIMIENTO</th>
               <th className="px-4 py-3 text-center font-semibold">MOROSIDAD (DIAS)</th>
+              <th className="px-4 py-3 font-semibold">VENDEDOR</th>
               <th className="px-4 py-3 text-right font-semibold">TOTAL</th>
               <th className="px-4 py-3 font-semibold">ACCIONES</th>
             </tr>
@@ -360,6 +367,7 @@ export default function DataView() {
                     <td className={`px-4 py-2 text-center ${f.overdueDays >= 15 ? "text-red-600" : "text-zinc-700"}`}>
                       {f.overdueDays}
                     </td>
+                    <td className="px-4 py-2 text-zinc-700">{f.seller}</td>
                     <td className="px-4 py-2 text-right text-zinc-700">{formatCurrency(f.total ?? 0)}</td>
                     <td className="px-4 py-2">
                       <button
@@ -374,7 +382,7 @@ export default function DataView() {
                   </tr>
                 ))}
                 <tr className="border-b border-zinc-200 bg-zinc-100 font-bold">
-                  <td colSpan={7} className="px-4 py-2 text-right text-zinc-700">
+                  <td colSpan={8} className="px-4 py-2 text-right text-zinc-700">
                     Subtotal {g.client}
                   </td>
                   <td className="px-4 py-2 text-right text-zinc-900 font-bold">{formatCurrency(g.subtotal)}</td>
@@ -383,7 +391,7 @@ export default function DataView() {
               </Fragment>
             ))}
             <tr className="bg-zinc-900 font-semibold text-white">
-              <td colSpan={7} className="px-4 py-3 text-right">
+              <td colSpan={8} className="px-4 py-3 text-right">
                 TOTAL
               </td>
               <td className="px-4 py-3 text-right">{formatCurrency(grandTotal)}</td>
