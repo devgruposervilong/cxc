@@ -31,15 +31,28 @@ export default function DataView() {
   const { filas, nombreArchivo, cargadoEn, setFilas, setNombreArchivo, setCargadoEn, uploadId, setUploadId } =
     usePanel();
   const [selectedVendedor, setSelectedVendedor] = useState<string | null>(null);
+  const [selectedUnidad, setSelectedUnidad] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [saveStatus, setSaveStatus] = useState<{ text: string; ok: boolean } | null>(null);
   const queryClient = useQueryClient();
 
+  // Unidades de negocio disponibles según las filas cargadas (vienen del
+  // maestro de clientes vía el join en lectura).
+  const unidades = useMemo(() => {
+    const set = new Set<string>();
+    for (const f of filas) {
+      if (f.businessUnit) set.add(f.businessUnit);
+    }
+    return Array.from(set).sort();
+  }, [filas]);
+
   const filteredRows = useMemo(() => {
-    if (!selectedVendedor) return filas;
-    return filas.filter((f) => f.seller === selectedVendedor);
-  }, [filas, selectedVendedor]);
+    let rows = filas;
+    if (selectedUnidad) rows = rows.filter((f) => f.businessUnit === selectedUnidad);
+    if (!selectedVendedor) return rows;
+    return rows.filter((f) => f.seller === selectedVendedor);
+  }, [filas, selectedVendedor, selectedUnidad]);
 
   const totalInvoices = filteredRows.filter((f) => f.type === "FACT").length;
   const totalCreditNotes = filteredRows.filter((f) => f.type === "N/CR").length;
@@ -270,48 +283,67 @@ export default function DataView() {
         </div>
       </div>
 
-      {/* Vendor filter chips */}
-      <div className="flex shrink-0 flex-wrap items-center gap-2">
-        <button
-          onClick={() => setSelectedVendedor(null)}
-          className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-            !selectedVendedor
-              ? "bg-zinc-900 text-white"
-              : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
-          }`}
-        >
-          Todos
-        </button>
-        {sellers.map((s) => (
+      {/* Filtros: vendedores a la izquierda, unidad de negocio a la derecha */}
+      <div className="flex shrink-0 items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-2">
           <button
-            key={s.name}
-            onClick={() => setSelectedVendedor(s.name)}
+            onClick={() => setSelectedVendedor(null)}
             className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-              selectedVendedor === s.name
+              !selectedVendedor
                 ? "bg-zinc-900 text-white"
                 : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
             }`}
-            title={`Facturas: ${s.invoices} | N/C: ${s.creditNotes} | CxC: ${formatCurrency(s.receivables)}`}
           >
-            {s.name} · {s.percentage.toFixed(1)}%
+            Todos
           </button>
-        ))}
+          {sellers.map((s) => (
+            <button
+              key={s.name}
+              onClick={() => setSelectedVendedor(s.name)}
+              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                selectedVendedor === s.name
+                  ? "bg-zinc-900 text-white"
+                  : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+              }`}
+              title={`Facturas: ${s.invoices} | N/C: ${s.creditNotes} | CxC: ${formatCurrency(s.receivables)}`}
+            >
+              {s.name} · {s.percentage.toFixed(1)}%
+            </button>
+          ))}
+        </div>
+        <label className="flex shrink-0 items-center gap-2">
+          <span className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+            Unidad de negocio
+          </span>
+          <select
+            value={selectedUnidad ?? ""}
+            onChange={(e) => setSelectedUnidad(e.target.value || null)}
+            className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-700 shadow-sm transition-colors focus:border-emerald-500 focus:outline-none"
+          >
+            <option value="">Todas</option>
+            {unidades.map((u) => (
+              <option key={u} value={u}>
+                {u}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
 
       {/* Table: alto flexible con scroll vertical interno */}
       <div className="min-h-0 flex-1 overflow-y-auto rounded-lg border border-zinc-200 bg-white shadow-sm">
         <table className="w-full text-left text-sm">
-          <thead className="sticky top-0 z-10 bg-zinc-50">
-            <tr className="border-b border-zinc-200">
-              <th className="px-4 py-3 font-semibold text-zinc-700">RANGO</th>
-              <th className="px-4 py-3 font-semibold text-zinc-700">CLIENTE</th>
-              <th className="px-4 py-3 font-semibold text-zinc-700">TIPO</th>
-              <th className="px-4 py-3 font-semibold text-zinc-700">NUMERO</th>
-              <th className="px-4 py-3 font-semibold text-zinc-700">EMISION</th>
-              <th className="px-4 py-3 font-semibold text-zinc-700">VENCIMIENTO</th>
-              <th className="px-4 py-3 text-center font-semibold text-zinc-700">MOROSIDAD</th>
-              <th className="px-4 py-3 text-right font-semibold text-zinc-700">TOTAL</th>
-              <th className="px-4 py-3 font-semibold text-zinc-700">ACCIONES</th>
+          <thead className="sticky top-0 z-10 bg-zinc-900 text-white">
+            <tr className="border-b border-zinc-700">
+              <th className="px-4 py-3 font-semibold">RANGO</th>
+              <th className="px-4 py-3 font-semibold">CLIENTE</th>
+              <th className="px-4 py-3 font-semibold">TIPO</th>
+              <th className="px-4 py-3 font-semibold">NUMERO</th>
+              <th className="px-4 py-3 font-semibold">EMISION</th>
+              <th className="px-4 py-3 font-semibold">VENCIMIENTO</th>
+              <th className="px-4 py-3 text-center font-semibold">MOROSIDAD (DIAS)</th>
+              <th className="px-4 py-3 text-right font-semibold">TOTAL</th>
+              <th className="px-4 py-3 font-semibold">ACCIONES</th>
             </tr>
           </thead>
           <tbody>
@@ -341,11 +373,11 @@ export default function DataView() {
                     </td>
                   </tr>
                 ))}
-                <tr className="border-b border-zinc-200 bg-zinc-100 font-medium">
+                <tr className="border-b border-zinc-200 bg-zinc-100 font-bold">
                   <td colSpan={7} className="px-4 py-2 text-right text-zinc-700">
                     Subtotal {g.client}
                   </td>
-                  <td className="px-4 py-2 text-right text-zinc-900">{formatCurrency(g.subtotal)}</td>
+                  <td className="px-4 py-2 text-right text-zinc-900 font-bold">{formatCurrency(g.subtotal)}</td>
                   <td />
                 </tr>
               </Fragment>
