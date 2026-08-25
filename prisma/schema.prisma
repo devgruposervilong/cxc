@@ -58,3 +58,18 @@ model Client {
 
   @@map("client")
 }
+
+// Tabla VENDEDORES (CODIGO, NOMBRE, APELLIDO, ZONA, KEY_URL).
+// keyUrl es único: es la clave de la URL pública por vendedor.
+model Seller {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  surname   String?
+  zone      String?
+  keyUrl    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("seller")
+}

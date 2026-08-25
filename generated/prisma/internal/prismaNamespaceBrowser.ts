@@ -53,7 +53,8 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   Upload: 'Upload',
   Document: 'Document',
-  Client: 'Client'
+  Client: 'Client',
+  Seller: 'Seller'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -108,6 +109,20 @@ export const ClientScalarFieldEnum = {
 } as const
 
 export type ClientScalarFieldEnum = (typeof ClientScalarFieldEnum)[keyof typeof ClientScalarFieldEnum]
+
+
+export const SellerScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  surname: 'surname',
+  zone: 'zone',
+  keyUrl: 'keyUrl',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SellerScalarFieldEnum = (typeof SellerScalarFieldEnum)[keyof typeof SellerScalarFieldEnum]
 
 
 export const SortOrder = {

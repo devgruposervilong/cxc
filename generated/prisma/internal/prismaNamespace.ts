@@ -399,7 +399,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   Upload: 'Upload',
   Document: 'Document',
-  Client: 'Client'
+  Client: 'Client',
+  Seller: 'Seller'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -415,7 +416,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "upload" | "document" | "client"
+    modelProps: "upload" | "document" | "client" | "seller"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -641,6 +642,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Seller: {
+      payload: Prisma.$SellerPayload<ExtArgs>
+      fields: Prisma.SellerFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SellerFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SellerPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SellerFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SellerPayload>
+        }
+        findFirst: {
+          args: Prisma.SellerFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SellerPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SellerFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SellerPayload>
+        }
+        findMany: {
+          args: Prisma.SellerFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SellerPayload>[]
+        }
+        create: {
+          args: Prisma.SellerCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SellerPayload>
+        }
+        createMany: {
+          args: Prisma.SellerCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SellerCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SellerPayload>[]
+        }
+        delete: {
+          args: Prisma.SellerDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SellerPayload>
+        }
+        update: {
+          args: Prisma.SellerUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SellerPayload>
+        }
+        deleteMany: {
+          args: Prisma.SellerDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SellerUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SellerUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SellerPayload>[]
+        }
+        upsert: {
+          args: Prisma.SellerUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SellerPayload>
+        }
+        aggregate: {
+          args: Prisma.SellerAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSeller>
+        }
+        groupBy: {
+          args: Prisma.SellerGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SellerGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SellerCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SellerCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -716,6 +791,20 @@ export const ClientScalarFieldEnum = {
 } as const
 
 export type ClientScalarFieldEnum = (typeof ClientScalarFieldEnum)[keyof typeof ClientScalarFieldEnum]
+
+
+export const SellerScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  surname: 'surname',
+  zone: 'zone',
+  keyUrl: 'keyUrl',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SellerScalarFieldEnum = (typeof SellerScalarFieldEnum)[keyof typeof SellerScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -985,6 +1074,7 @@ export type GlobalOmitConfig = {
   upload?: Prisma.UploadOmit
   document?: Prisma.DocumentOmit
   client?: Prisma.ClientOmit
+  seller?: Prisma.SellerOmit
 }
 
 /* Types for Logging */

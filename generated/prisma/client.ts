@@ -56,3 +56,8 @@ export type Document = Prisma.DocumentModel
  * 
  */
 export type Client = Prisma.ClientModel
+/**
+ * Model Seller
+ * 
+ */
+export type Seller = Prisma.SellerModel

@@ -1,5 +1,6 @@
 import type { DataRow, DocumentType } from "../application/data-row";
 import type { Client } from "../application/client";
+import type { Seller } from "../application/seller";
 import type { UploadModel } from "./models";
 
 export type CreateUploadInput = {
@@ -24,4 +25,10 @@ export interface DocumentRepository {
 // Maestro de clientes: fuente de verdad de seller y businessUnit.
 export interface ClientRepository {
   getClients(): Promise<Client[]>;
+}
+
+// Maestro de vendedores: keyUrl es la clave de la URL pública por vendedor.
+export interface SellerRepository {
+  getSellerByKeyUrl(keyUrl: string): Promise<Seller | null>;
+  getSellers(): Promise<Seller[]>;
 }

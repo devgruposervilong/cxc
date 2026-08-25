@@ -11,4 +11,5 @@
 export type * from './models/Upload'
 export type * from './models/Document'
 export type * from './models/Client'
+export type * from './models/Seller'
 export type * from './commonInputTypes'
