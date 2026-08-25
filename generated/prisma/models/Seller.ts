@@ -31,6 +31,7 @@ export type SellerMinAggregateOutputType = {
   surname: string | null
   zone: string | null
   keyUrl: string | null
+  status: $Enums.SellerStatus | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -42,6 +43,7 @@ export type SellerMaxAggregateOutputType = {
   surname: string | null
   zone: string | null
   keyUrl: string | null
+  status: $Enums.SellerStatus | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -53,6 +55,7 @@ export type SellerCountAggregateOutputType = {
   surname: number
   zone: number
   keyUrl: number
+  status: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -66,6 +69,7 @@ export type SellerMinAggregateInputType = {
   surname?: true
   zone?: true
   keyUrl?: true
+  status?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -77,6 +81,7 @@ export type SellerMaxAggregateInputType = {
   surname?: true
   zone?: true
   keyUrl?: true
+  status?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -88,6 +93,7 @@ export type SellerCountAggregateInputType = {
   surname?: true
   zone?: true
   keyUrl?: true
+  status?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -172,6 +178,7 @@ export type SellerGroupByOutputType = {
   surname: string | null
   zone: string | null
   keyUrl: string
+  status: $Enums.SellerStatus
   createdAt: Date
   updatedAt: Date
   _count: SellerCountAggregateOutputType | null
@@ -204,6 +211,7 @@ export type SellerWhereInput = {
   surname?: Prisma.StringNullableFilter<"Seller"> | string | null
   zone?: Prisma.StringNullableFilter<"Seller"> | string | null
   keyUrl?: Prisma.StringFilter<"Seller"> | string
+  status?: Prisma.EnumSellerStatusFilter<"Seller"> | $Enums.SellerStatus
   createdAt?: Prisma.DateTimeFilter<"Seller"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Seller"> | Date | string
 }
@@ -215,6 +223,7 @@ export type SellerOrderByWithRelationInput = {
   surname?: Prisma.SortOrderInput | Prisma.SortOrder
   zone?: Prisma.SortOrderInput | Prisma.SortOrder
   keyUrl?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -229,6 +238,7 @@ export type SellerWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"Seller"> | string
   surname?: Prisma.StringNullableFilter<"Seller"> | string | null
   zone?: Prisma.StringNullableFilter<"Seller"> | string | null
+  status?: Prisma.EnumSellerStatusFilter<"Seller"> | $Enums.SellerStatus
   createdAt?: Prisma.DateTimeFilter<"Seller"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Seller"> | Date | string
 }, "id" | "code" | "keyUrl">
@@ -240,6 +250,7 @@ export type SellerOrderByWithAggregationInput = {
   surname?: Prisma.SortOrderInput | Prisma.SortOrder
   zone?: Prisma.SortOrderInput | Prisma.SortOrder
   keyUrl?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.SellerCountOrderByAggregateInput
@@ -257,6 +268,7 @@ export type SellerScalarWhereWithAggregatesInput = {
   surname?: Prisma.StringNullableWithAggregatesFilter<"Seller"> | string | null
   zone?: Prisma.StringNullableWithAggregatesFilter<"Seller"> | string | null
   keyUrl?: Prisma.StringWithAggregatesFilter<"Seller"> | string
+  status?: Prisma.EnumSellerStatusWithAggregatesFilter<"Seller"> | $Enums.SellerStatus
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Seller"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Seller"> | Date | string
 }
@@ -268,6 +280,7 @@ export type SellerCreateInput = {
   surname?: string | null
   zone?: string | null
   keyUrl: string
+  status?: $Enums.SellerStatus
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -279,6 +292,7 @@ export type SellerUncheckedCreateInput = {
   surname?: string | null
   zone?: string | null
   keyUrl: string
+  status?: $Enums.SellerStatus
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -290,6 +304,7 @@ export type SellerUpdateInput = {
   surname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   zone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   keyUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumSellerStatusFieldUpdateOperationsInput | $Enums.SellerStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -301,6 +316,7 @@ export type SellerUncheckedUpdateInput = {
   surname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   zone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   keyUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumSellerStatusFieldUpdateOperationsInput | $Enums.SellerStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -312,6 +328,7 @@ export type SellerCreateManyInput = {
   surname?: string | null
   zone?: string | null
   keyUrl: string
+  status?: $Enums.SellerStatus
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -323,6 +340,7 @@ export type SellerUpdateManyMutationInput = {
   surname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   zone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   keyUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumSellerStatusFieldUpdateOperationsInput | $Enums.SellerStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -334,6 +352,7 @@ export type SellerUncheckedUpdateManyInput = {
   surname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   zone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   keyUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumSellerStatusFieldUpdateOperationsInput | $Enums.SellerStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -345,6 +364,7 @@ export type SellerCountOrderByAggregateInput = {
   surname?: Prisma.SortOrder
   zone?: Prisma.SortOrder
   keyUrl?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -356,6 +376,7 @@ export type SellerMaxOrderByAggregateInput = {
   surname?: Prisma.SortOrder
   zone?: Prisma.SortOrder
   keyUrl?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -367,8 +388,13 @@ export type SellerMinOrderByAggregateInput = {
   surname?: Prisma.SortOrder
   zone?: Prisma.SortOrder
   keyUrl?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type EnumSellerStatusFieldUpdateOperationsInput = {
+  set?: $Enums.SellerStatus
 }
 
 
@@ -380,6 +406,7 @@ export type SellerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   surname?: boolean
   zone?: boolean
   keyUrl?: boolean
+  status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["seller"]>
@@ -391,6 +418,7 @@ export type SellerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   surname?: boolean
   zone?: boolean
   keyUrl?: boolean
+  status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["seller"]>
@@ -402,6 +430,7 @@ export type SellerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   surname?: boolean
   zone?: boolean
   keyUrl?: boolean
+  status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["seller"]>
@@ -413,11 +442,12 @@ export type SellerSelectScalar = {
   surname?: boolean
   zone?: boolean
   keyUrl?: boolean
+  status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type SellerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "name" | "surname" | "zone" | "keyUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["seller"]>
+export type SellerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "name" | "surname" | "zone" | "keyUrl" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["seller"]>
 
 export type $SellerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Seller"
@@ -429,6 +459,7 @@ export type $SellerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     surname: string | null
     zone: string | null
     keyUrl: string
+    status: $Enums.SellerStatus
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["seller"]>
@@ -860,6 +891,7 @@ export interface SellerFieldRefs {
   readonly surname: Prisma.FieldRef<"Seller", 'String'>
   readonly zone: Prisma.FieldRef<"Seller", 'String'>
   readonly keyUrl: Prisma.FieldRef<"Seller", 'String'>
+  readonly status: Prisma.FieldRef<"Seller", 'SellerStatus'>
   readonly createdAt: Prisma.FieldRef<"Seller", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Seller", 'DateTime'>
 }

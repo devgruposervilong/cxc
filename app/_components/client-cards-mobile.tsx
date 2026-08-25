@@ -66,7 +66,7 @@ function ClientCard({ group }: { group: ClientCardGroup }) {
                   <p className="mt-0.5 text-xs text-zinc-500">
                     Vence {d.expiration ?? "-"}
                     {d.overdueDays > 0 && (
-                      <span className={d.overdueDays >= 15 ? "font-medium text-red-600" : undefined}>
+                      <span className="font-medium text-red-600">
                         {" · "}
                         {d.overdueDays} días de mora
                       </span>

@@ -15,3 +15,11 @@ export const DocumentType = {
 } as const
 
 export type DocumentType = (typeof DocumentType)[keyof typeof DocumentType]
+
+
+export const SellerStatus = {
+  ACTIVO: 'ACTIVO',
+  INACTIVO: 'INACTIVO'
+} as const
+
+export type SellerStatus = (typeof SellerStatus)[keyof typeof SellerStatus]

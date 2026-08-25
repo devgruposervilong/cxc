@@ -47,6 +47,7 @@ async function main() {
         surname: cell(row.APELLIDO),
         zone: cell(row.ZONA),
         keyUrl,
+        status: "ACTIVO",
       },
     });
     count++;

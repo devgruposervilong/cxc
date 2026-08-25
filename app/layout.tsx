@@ -27,6 +27,10 @@ export const metadata: Metadata = {
   },
 };
 
+// App 100% data-driven (header con vendedores desde BD): siempre SSR por
+// request, sin prerender en build.
+export const dynamic = "force-dynamic";
+
 export default function RootLayout({
   children,
 }: Readonly<{

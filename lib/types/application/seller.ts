@@ -1,11 +1,14 @@
 // Entidad VENDEDOR: corresponde a la hoja VENDEDORES
-// (CODIGO, NOMBRE, APELLIDO, ZONA, KEY_URL).
+// (CODIGO, NOMBRE, APELLIDO, ZONA, KEY_URL, STATUS).
+export type SellerStatus = "ACTIVO" | "INACTIVO";
+
 export type Seller = {
   code: string;
   name: string;
   surname: string | null;
   zone: string | null;
   keyUrl: string;
+  status: SellerStatus;
 };
 
 export function normalizeSellerName(value: string | null): string {

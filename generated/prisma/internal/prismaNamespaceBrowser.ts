@@ -118,6 +118,7 @@ export const SellerScalarFieldEnum = {
   surname: 'surname',
   zone: 'zone',
   keyUrl: 'keyUrl',
+  status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
