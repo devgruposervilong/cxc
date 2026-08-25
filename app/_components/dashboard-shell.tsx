@@ -1,9 +1,9 @@
 //COMPONENTE EN LA RUTA /_COMPONENTS/DASHBOARD-SHELL
 import { BarChart3 } from "lucide-react";
-import Link from "next/link";
 import type { ReactNode } from "react";
 import { PrismaSellerRepository } from "@/repositories/prisma-seller-repository";
 import type { Seller } from "@/lib/types";
+import ActiveSellersNav from "./active-sellers-nav";
 
 // Vendedores activos para el nav del header. Si la BD no está disponible el
 // header sigue funcionando sin links.
@@ -33,24 +33,7 @@ export default async function DashboardShell({ children }: { children: ReactNode
               <h1 className="text-xl font-semibold text-zinc-900">Cuentas x Cobrar</h1>
             </div>
 
-            {/* Desktop: accesos directos al portal de cada vendedor activo */}
-            <nav className="hidden flex-wrap items-center justify-end gap-x-3 gap-y-1 md:flex">
-              {activeSellers.map((s) => {
-                const fullName = [s.name, s.surname].filter(Boolean).join(" ");
-                return (
-                  <Link
-                    key={s.keyUrl}
-                    href={`/vendedor/${s.keyUrl}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-zinc-500 transition-colors hover:text-zinc-900 hover:underline"
-                    title={`Ver CxC de ${fullName} (abre en otra pestaña)`}
-                  >
-                    {fullName}
-                  </Link>
-                );
-              })}
-            </nav>
+            <ActiveSellersNav sellers={activeSellers} />
           </div>
         </header>
 

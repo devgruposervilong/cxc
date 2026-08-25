@@ -33,7 +33,6 @@ export default async function SellerPage({ params }: PageProps) {
     <SellerStatement
       fullName={fullName}
       zone={portal.seller.zone}
-      fileName={portal.fileName}
       loadedAt={portal.loadedAt}
       rows={portal.rows}
     />

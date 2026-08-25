@@ -7,7 +7,6 @@ import ClientCardsMobile from "@/app/_components/client-cards-mobile";
 export type SellerStatementProps = {
   fullName: string;
   zone: string | null;
-  fileName: string;
   loadedAt: string;
   rows: DataRow[];
 };
@@ -19,7 +18,7 @@ type ClientGroup = {
   subtotal: number;
 };
 
-export default function SellerStatement({ fullName, zone, fileName, loadedAt, rows }: SellerStatementProps) {
+export default function SellerStatement({ fullName, zone, loadedAt, rows }: SellerStatementProps) {
   const totalInvoices = rows.filter((f) => f.type === "FACT").length;
   const totalCreditNotes = rows.filter((f) => f.type === "N/CR").length;
 
@@ -55,7 +54,7 @@ export default function SellerStatement({ fullName, zone, fileName, loadedAt, ro
           <h2 className="text-lg font-semibold text-zinc-900">{fullName}</h2>
           <p className="text-sm text-zinc-500">
             {zone ? `${zone} · ` : ""}
-            {fileName ? `${fileName} · Actualizado: ${loadedAt}` : "Sin carga de datos activa"}
+            {loadedAt ? `Actualizado: ${loadedAt}` : "Sin carga de datos activa"}
           </p>
         </div>
       </div>

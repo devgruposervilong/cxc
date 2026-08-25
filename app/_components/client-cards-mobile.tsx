@@ -16,7 +16,8 @@ export type ClientCardGroup = {
 };
 
 function ClientCard({ group }: { group: ClientCardGroup }) {
-  const [open, setOpen] = useState(false);
+  // Abiertas por defecto; el usuario puede colapsar/expandir cada card.
+  const [open, setOpen] = useState(true);
 
   return (
     <div className="rounded-xl border border-zinc-200 bg-white">

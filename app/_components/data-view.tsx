@@ -215,7 +215,7 @@ export default function DataView() {
       {/* Toolbar: información de carga y acciones en la parte superior derecha */}
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
         <span className="min-w-0 text-sm text-zinc-500">
-          {nombreArchivo} · Cargado: {cargadoEn}
+          Actualizado: {cargadoEn}
           {saveStatus && (
             <span className={saveStatus.ok ? "text-emerald-600" : "text-red-600"}>
               {" "}· {saveStatus.text}
