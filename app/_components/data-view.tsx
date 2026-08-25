@@ -6,11 +6,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import { usePanel } from "../page";
 import { rankRows } from "@/lib/ranking";
 import { refreshMorosidad } from "@/lib/morosidad";
+import { formatCurrency } from "@/lib/format";
 import { saveUpload, deleteUpload, deleteDocumentFromUpload, getLatestUpload } from "@/lib/api/uploads";
 import { UPLOAD_QUERY_KEY } from "@/lib/hooks/use-upload-data";
 import type { DataRow, DocumentType } from "@/lib/types";
 import * as XLSX from "xlsx";
 import { Database, Download, Trash2 } from "lucide-react";
+import ClientCardsMobile from "./client-cards-mobile";
 
 type ClientGroup = {
   client: string;
@@ -18,14 +20,6 @@ type ClientGroup = {
   docs: DataRow[];
   subtotal: number;
 };
-
-function formatCurrency(valor: number) {
-  const negativo = valor < 0;
-  const abs = Math.abs(valor);
-  const [entera, decimal] = abs.toFixed(2).split(".");
-  const conMiles = entera.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  return `${negativo ? "-" : ""}$${conMiles},${decimal}`;
-}
 
 export default function DataView() {
   const { filas, nombreArchivo, cargadoEn, setFilas, setNombreArchivo, setCargadoEn, uploadId, setUploadId } =
@@ -336,8 +330,13 @@ export default function DataView() {
         </label>
       </div>
 
-      {/* Table: alto flexible con scroll vertical interno */}
-      <div className="min-h-0 flex-1 overflow-y-auto rounded-lg border border-zinc-200 bg-white shadow-sm">
+      {/* Vista mobile: cards expandibles por cliente */}
+      <div className="min-h-0 flex-1 overflow-y-auto pr-0.5 md:hidden">
+        <ClientCardsMobile groups={groups} />
+      </div>
+
+      {/* Table: alto flexible con scroll vertical interno (solo desktop) */}
+      <div className="hidden min-h-0 flex-1 overflow-y-auto rounded-lg border border-zinc-200 bg-white shadow-sm md:block">
         <table className="w-full text-left text-sm">
           <thead className="sticky top-0 z-10 bg-zinc-900 text-white">
             <tr className="border-b border-zinc-700">

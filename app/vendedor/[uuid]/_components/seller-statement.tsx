@@ -1,6 +1,8 @@
 //COMPONENTE EN LA RUTA /VENDEDOR/[UUID]/_COMPONENTS/SELLER-STATEMENT
 import { Fragment, useMemo } from "react";
 import type { DataRow } from "@/lib/types";
+import { formatCurrency } from "@/lib/format";
+import ClientCardsMobile from "@/app/_components/client-cards-mobile";
 
 export type SellerStatementProps = {
   fullName: string;
@@ -16,14 +18,6 @@ type ClientGroup = {
   docs: DataRow[];
   subtotal: number;
 };
-
-function formatCurrency(valor: number) {
-  const negativo = valor < 0;
-  const abs = Math.abs(valor);
-  const [entera, decimal] = abs.toFixed(2).split(".");
-  const conMiles = entera.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  return `${negativo ? "-" : ""}$${conMiles},${decimal}`;
-}
 
 export default function SellerStatement({ fullName, zone, fileName, loadedAt, rows }: SellerStatementProps) {
   const totalInvoices = rows.filter((f) => f.type === "FACT").length;
@@ -88,8 +82,13 @@ export default function SellerStatement({ fullName, zone, fileName, loadedAt, ro
         </div>
       </div>
 
-      {/* Detalle por cliente */}
-      <div className="min-h-0 flex-1 overflow-y-auto rounded-lg border border-zinc-200 bg-white shadow-sm">
+      {/* Vista mobile: cards expandibles por cliente */}
+      <div className="min-h-0 flex-1 overflow-y-auto pr-0.5 md:hidden">
+        <ClientCardsMobile groups={groups} />
+      </div>
+
+      {/* Detalle por cliente (solo desktop) */}
+      <div className="hidden min-h-0 flex-1 overflow-y-auto rounded-lg border border-zinc-200 bg-white shadow-sm md:block">
         {groups.length === 0 ? (
           <div className="flex h-full items-center justify-center p-8 text-sm text-zinc-500">
             No hay cuentas por cobrar asignadas en este momento.
