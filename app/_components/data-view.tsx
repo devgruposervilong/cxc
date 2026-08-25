@@ -213,8 +213,8 @@ export default function DataView() {
   return (
     <div className="flex h-full flex-col gap-4">
       {/* Toolbar: información de carga y acciones en la parte superior derecha */}
-      <div className="flex shrink-0 items-center justify-between gap-2">
-        <span className="text-sm text-zinc-500">
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
+        <span className="min-w-0 text-sm text-zinc-500">
           {nombreArchivo} · Cargado: {cargadoEn}
           {saveStatus && (
             <span className={saveStatus.ok ? "text-emerald-600" : "text-red-600"}>
@@ -222,7 +222,7 @@ export default function DataView() {
             </span>
           )}
         </span>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={saveToDb}
             disabled={saving || uploadId !== null}
@@ -261,18 +261,18 @@ export default function DataView() {
       </div>
 
       {/* Dashboard cards */}
-      <div className="grid shrink-0 grid-cols-2 gap-4 lg:grid-cols-3">
-        <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
+      <div className="grid shrink-0 grid-cols-2 gap-2 lg:grid-cols-3 md:gap-4">
+        <div className="rounded-lg border border-zinc-200 bg-white p-3 shadow-sm md:p-4">
           <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Total Facturas</p>
-          <p className="mt-1 text-2xl font-semibold text-zinc-900">{totalInvoices}</p>
+          <p className="mt-1 text-lg font-semibold text-zinc-900 md:text-2xl">{totalInvoices}</p>
         </div>
-        <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
+        <div className="rounded-lg border border-zinc-200 bg-white p-3 shadow-sm md:p-4">
           <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Total Notas de Crédito</p>
-          <p className="mt-1 text-2xl font-semibold text-zinc-900">{totalCreditNotes}</p>
+          <p className="mt-1 text-lg font-semibold text-zinc-900 md:text-2xl">{totalCreditNotes}</p>
         </div>
-        <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
+        <div className="rounded-lg border border-zinc-200 bg-white p-3 shadow-sm md:p-4">
           <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Total Cuentas x Cobrar</p>
-          <p className="mt-1 text-2xl font-semibold text-emerald-600">
+          <p className="mt-1 text-lg font-semibold text-emerald-600 md:text-2xl">
             {formatCurrency(grandTotal)}
             {selectedVendedor && (
               <span className="ml-2 text-sm font-normal text-zinc-500">
@@ -284,7 +284,7 @@ export default function DataView() {
       </div>
 
       {/* Filtros: vendedores a la izquierda, unidad de negocio a la derecha */}
-      <div className="flex shrink-0 items-center justify-between gap-4">
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setSelectedVendedor(null)}
@@ -330,8 +330,8 @@ export default function DataView() {
         </label>
       </div>
 
-      {/* Vista mobile: cards expandibles por cliente */}
-      <div className="min-h-0 flex-1 overflow-y-auto pr-0.5 md:hidden">
+      {/* Vista mobile: cards expandibles por cliente (scroll global del documento) */}
+      <div className="md:hidden">
         <ClientCardsMobile groups={groups} />
       </div>
 

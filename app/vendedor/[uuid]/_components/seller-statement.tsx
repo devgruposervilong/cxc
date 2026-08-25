@@ -50,8 +50,8 @@ export default function SellerStatement({ fullName, zone, fileName, loadedAt, ro
 
   return (
     <div className="flex h-full flex-col gap-4">
-      <div className="flex shrink-0 items-end justify-between gap-2">
-        <div>
+      <div className="flex shrink-0 flex-wrap items-end justify-between gap-2">
+        <div className="min-w-0">
           <h2 className="text-lg font-semibold text-zinc-900">{fullName}</h2>
           <p className="text-sm text-zinc-500">
             {zone ? `${zone} · ` : ""}
@@ -61,29 +61,29 @@ export default function SellerStatement({ fullName, zone, fileName, loadedAt, ro
       </div>
 
       {/* Resumen */}
-      <div className="grid shrink-0 grid-cols-2 gap-4 lg:grid-cols-4">
-        <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
+      <div className="grid shrink-0 grid-cols-2 gap-2 lg:grid-cols-4 md:gap-4">
+        <div className="rounded-lg border border-zinc-200 bg-white p-3 shadow-sm md:p-4">
           <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Facturas</p>
-          <p className="mt-1 text-2xl font-semibold text-zinc-900">{totalInvoices}</p>
+          <p className="mt-1 text-lg font-semibold text-zinc-900 md:text-2xl">{totalInvoices}</p>
         </div>
-        <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
+        <div className="rounded-lg border border-zinc-200 bg-white p-3 shadow-sm md:p-4">
           <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Notas de Crédito</p>
-          <p className="mt-1 text-2xl font-semibold text-zinc-900">{totalCreditNotes}</p>
+          <p className="mt-1 text-lg font-semibold text-zinc-900 md:text-2xl">{totalCreditNotes}</p>
         </div>
-        <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
+        <div className="rounded-lg border border-zinc-200 bg-white p-3 shadow-sm md:p-4">
           <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Facturas Vencidas (+15 días)</p>
-          <p className={`mt-1 text-2xl font-semibold ${vencidas > 0 ? "text-red-600" : "text-zinc-900"}`}>
+          <p className={`mt-1 text-lg font-semibold md:text-2xl ${vencidas > 0 ? "text-red-600" : "text-zinc-900"}`}>
             {vencidas}
           </p>
         </div>
-        <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
+        <div className="rounded-lg border border-zinc-200 bg-white p-3 shadow-sm md:p-4">
           <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Total Cuentas x Cobrar</p>
-          <p className="mt-1 text-2xl font-semibold text-emerald-600">{formatCurrency(grandTotal)}</p>
+          <p className="mt-1 text-lg font-semibold text-emerald-600 md:text-2xl">{formatCurrency(grandTotal)}</p>
         </div>
       </div>
 
-      {/* Vista mobile: cards expandibles por cliente */}
-      <div className="min-h-0 flex-1 overflow-y-auto pr-0.5 md:hidden">
+      {/* Vista mobile: cards expandibles por cliente (scroll global del documento) */}
+      <div className="md:hidden">
         <ClientCardsMobile groups={groups} />
       </div>
 
