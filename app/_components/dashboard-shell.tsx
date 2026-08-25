@@ -41,8 +41,10 @@ export default async function DashboardShell({ children }: { children: ReactNode
                   <Link
                     key={s.keyUrl}
                     href={`/vendedor/${s.keyUrl}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-sm text-zinc-500 transition-colors hover:text-zinc-900 hover:underline"
-                    title={`Ver CxC de ${fullName}`}
+                    title={`Ver CxC de ${fullName} (abre en otra pestaña)`}
                   >
                     {fullName}
                   </Link>
