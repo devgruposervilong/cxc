@@ -29,7 +29,7 @@ function ClientCard({ group }: { group: ClientCardGroup }) {
       >
         <span className="flex min-w-0 items-center gap-3">
           <span className="shrink-0 text-xs text-zinc-400">{group.rank}</span>
-          <span className="truncate text-sm font-semibold text-zinc-900">{group.client}</span>
+          <span className="text-sm font-semibold text-zinc-900">{group.client}</span>
         </span>
         <span className="flex shrink-0 items-center gap-2">
           <span className="text-sm font-medium text-zinc-900">{formatCurrency(group.subtotal)}</span>
