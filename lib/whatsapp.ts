@@ -16,15 +16,19 @@ export function buildWhatsAppMessage(
   const lines: string[] = [];
 
   lines.push(`*Estado de Cuenta — ${client}*`);
-  lines.push("");
 
   for (const d of docs) {
-    const status = d.overdueDays > 0 ? ` (${d.overdueDays} días de mora)` : "";
-    lines.push(`*Documento:* ${d.type} N.º ${d.number}${status}`);
-    lines.push(`Vence: ${d.expiration ?? "N/D"} — ${formatCurrency(d.total ?? 0)}`);
     lines.push("");
+    lines.push(`*DOCUMENTO*`);
+    lines.push(`${d.type === "FACT" ? "Factura" : "N/CR"}: ${d.number}`);
+    lines.push(`Vence: ${d.expiration ?? "N/D"}`);
+    if (d.overdueDays > 0) {
+      lines.push(`Morosidad: ${d.overdueDays} días de mora`);
+    }
+    lines.push(`Total: ${formatCurrency(d.total ?? 0)}`);
   }
 
+  lines.push("");
   lines.push(`*TOTAL:* ${formatCurrency(subtotal)}`);
 
   return lines.join("\n");
