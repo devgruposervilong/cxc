@@ -28,7 +28,7 @@ function ClientCard({ group }: { group: ClientCardGroup }) {
         className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
       >
         <span className="flex min-w-0 items-center gap-3">
-          <span className="shrink-0 text-xs text-zinc-400">{group.rank}</span>
+          <span className="shrink-0 text-xs font-semibold text-zinc-400">{group.rank}</span>
           <span className="text-sm font-semibold text-zinc-900">{group.client}</span>
         </span>
         <span className="flex shrink-0 items-center gap-2">
