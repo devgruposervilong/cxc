@@ -23,9 +23,12 @@ function formatLoadedAt(iso: string): string {
   if (isNaN(d.getTime())) return iso;
   const dia = String(d.getDate()).padStart(2, "0");
   const mes = String(d.getMonth() + 1).padStart(2, "0");
-  const hora = String(d.getHours()).padStart(2, "0");
+  let hora = d.getHours();
+  const periodo = hora >= 12 ? "p. m." : "a. m.";
+  hora = hora % 12 || 12;
+  const horaStr = String(hora).padStart(2, "0");
   const minutos = String(d.getMinutes()).padStart(2, "0");
-  return `${dia}/${mes}/${d.getFullYear()} ${hora}:${minutos}`;
+  return `${dia}/${mes}/${d.getFullYear()} ${horaStr}:${minutos} ${periodo}`;
 }
 
 // Servicio frontend: la capa que se ejecuta en el navegador y llama a la API.
