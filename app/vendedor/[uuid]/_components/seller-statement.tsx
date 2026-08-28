@@ -3,7 +3,6 @@ import { Fragment, useMemo } from "react";
 import type { DataRow } from "@/lib/types";
 import { formatCurrency } from "@/lib/format";
 import ClientCardsMobile from "@/app/_components/client-cards-mobile";
-import WhatsAppShareButton from "@/app/_components/whatsapp-share-button";
 
 export type SellerStatementProps = {
   fullName: string;
@@ -105,7 +104,6 @@ export default function SellerStatement({ fullName, zone, loadedAt, rows }: Sell
                 <th className="px-4 py-3 font-semibold">VENCIMIENTO</th>
                 <th className="px-4 py-3 text-center font-semibold">MOROSIDAD (DIAS)</th>
                 <th className="px-4 py-3 text-right font-semibold">TOTAL</th>
-                <th className="px-4 py-3 font-semibold"></th>
               </tr>
             </thead>
             <tbody>
@@ -126,18 +124,15 @@ export default function SellerStatement({ fullName, zone, loadedAt, rows }: Sell
                     </tr>
                   ))}
                   <tr className="border-b border-zinc-200 bg-zinc-100 font-bold">
-                    <td colSpan={8} className="px-4 py-2 text-right text-zinc-700">
+                    <td colSpan={7} className="px-4 py-2 text-right text-zinc-700">
                       Subtotal {g.client}
                     </td>
                     <td className="px-4 py-2 text-right font-bold text-zinc-900">{formatCurrency(g.subtotal)}</td>
-                    <td className="px-4 py-2">
-                      <WhatsAppShareButton client={g.client} docs={g.docs} subtotal={g.subtotal} />
-                    </td>
                   </tr>
                 </Fragment>
               ))}
               <tr className="bg-zinc-900 font-semibold text-white">
-                <td colSpan={8} className="px-4 py-3 text-right">
+                <td colSpan={7} className="px-4 py-3 text-right">
                   TOTAL
                 </td>
                 <td className="px-4 py-3 text-right">{formatCurrency(grandTotal)}</td>
