@@ -1,0 +1,7 @@
+# Copiar a .dev.vars para desarrollo local.
+# En produccion usar: wrangler secret put <NOMBRE>
+BETTER_AUTH_SECRET=genera-un-secreto-largo-y-aleatorio
+SETUP_TOKEN=token-de-un-solo-uso-para-crear-el-primer-admin
+# Opcionales: solo si tienes un dominio verificado en Resend
+RESEND_API_KEY=
+EMAIL_FROM=

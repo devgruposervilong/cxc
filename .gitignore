@@ -1,5 +1,3 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
 /.pnp
@@ -13,32 +11,38 @@
 # testing
 /coverage
 
-# next.js
-/.next/
-/out/
-
-# production
+# build
+/dist
 /build
+/.wrangler
+/.tanstack
+
+# cloudflare
+.dev.vars*
+!.dev.vars.example
+
+# legacy prisma export
+/generated
+/d1-masters.sql
 
 # misc
 .DS_Store
 *.pem
+*.tsbuildinfo
+dev-server.log
 
 # debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
-dev-server.log
 
-# env files (can opt-in for committing if needed)
+# env files
 .env*
+!.env.example
+
+# typescript
+next-env.d.ts
 
 # vercel
 .vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-
