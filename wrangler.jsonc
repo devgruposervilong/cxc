@@ -12,7 +12,7 @@
     {
       "binding": "DB",
       "database_name": "cxc-db",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "3506776a-799f-445d-a7b4-42d348ea1958",
       "migrations_dir": "drizzle",
       "migrations_pattern": "drizzle/**/*.sql"
     }
