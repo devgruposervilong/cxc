@@ -9,7 +9,7 @@ import { sellerPortalQueryOptions } from "@/src/lib/queries";
 import { SellerStatement } from "@/src/components/seller-statement";
 import { Alert, Button } from "@/src/components/ui";
 
-export const Route = createFileRoute("/_app/vendedor/$uuid")({
+export const Route = createFileRoute("/_app/vendedor/$keyUrl")({
   beforeLoad: async ({ context, params }) => {
     const me = await context.queryClient.ensureQueryData(sessionQueryOptions());
 
@@ -17,16 +17,16 @@ export const Route = createFileRoute("/_app/vendedor/$uuid")({
       if (!me.seller) {
         throw redirect({ to: "/" });
       }
-      if (me.seller.keyUrl !== params.uuid) {
+      if (me.seller.keyUrl !== params.keyUrl) {
         throw redirect({
-          to: "/vendedor/$uuid",
-          params: { uuid: me.seller.keyUrl },
+          to: "/vendedor/$keyUrl",
+          params: { keyUrl: me.seller.keyUrl },
         });
       }
     }
   },
   loader: ({ context, params }) =>
-    context.queryClient.ensureQueryData(sellerPortalQueryOptions(params.uuid)),
+    context.queryClient.ensureQueryData(sellerPortalQueryOptions(params.keyUrl)),
   component: SellerPortalPage,
   errorComponent: SellerPortalError,
 });

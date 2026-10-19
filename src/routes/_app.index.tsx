@@ -7,8 +7,8 @@ export const Route = createFileRoute("/_app/")({
     const me = await context.queryClient.ensureQueryData(sessionQueryOptions());
     if (me?.user.role === "seller" && me.seller) {
       throw redirect({
-        to: "/vendedor/$uuid",
-        params: { uuid: me.seller.keyUrl },
+        to: "/vendedor/$keyUrl",
+        params: { keyUrl: me.seller.keyUrl },
       });
     }
   },

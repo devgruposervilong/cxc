@@ -8,6 +8,9 @@
 //
 // Reglas:
 //   - Los ids existentes nunca se sobrescriben (ON CONFLICT ... DO UPDATE sin id).
+//   - seller.keyUrl se genera con cuid2 en D1 y no se sobrescribe en conflictos:
+//     el enlace publico existente de cada vendedor se conserva aunque Postgres
+//     siga guardando un uuid.
 //   - No se toca seller.userId: los enlaces con usuarios ya creados se conservan.
 //   - upload/document no se migran: arrancan vacios.
 
@@ -63,12 +66,11 @@ async function main() {
     statements.push(
       [
         "INSERT INTO seller (id, code, name, surname, zone, keyUrl, status)",
-        `VALUES (${sqlString(createId())}, ${sqlString(seller.code)}, ${sqlString(seller.name)}, ${sqlString(seller.surname)}, ${sqlString(seller.zone)}, ${sqlString(seller.keyUrl)}, ${sqlEnum(seller.status)})`,
+        `VALUES (${sqlString(createId())}, ${sqlString(seller.code)}, ${sqlString(seller.name)}, ${sqlString(seller.surname)}, ${sqlString(seller.zone)}, ${sqlString(createId())}, ${sqlEnum(seller.status)})`,
         "ON CONFLICT(code) DO UPDATE SET",
         "  name = excluded.name,",
         "  surname = excluded.surname,",
         "  zone = excluded.zone,",
-        "  keyUrl = excluded.keyUrl,",
         "  status = excluded.status;",
       ].join("\n")
     );

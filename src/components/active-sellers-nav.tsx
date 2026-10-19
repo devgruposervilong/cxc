@@ -17,8 +17,8 @@ export function ActiveSellersNav({
     return (
       <nav className="hidden items-center gap-3 md:flex">
         <Link
-          to="/vendedor/$uuid"
-          params={{ uuid: sellerKeyUrl }}
+          to="/vendedor/$keyUrl"
+          params={{ keyUrl: sellerKeyUrl }}
           className="text-sm font-medium text-zinc-600 transition hover:text-zinc-900 hover:underline"
         >
           Mi portal
@@ -36,8 +36,8 @@ export function ActiveSellersNav({
         return (
           <Link
             key={seller.keyUrl}
-            to="/vendedor/$uuid"
-            params={{ uuid: seller.keyUrl }}
+            to="/vendedor/$keyUrl"
+            params={{ keyUrl: seller.keyUrl }}
             className="text-sm text-zinc-500 transition-colors hover:text-zinc-900 hover:underline"
             title={`Ver CxC de ${fullName}`}
           >

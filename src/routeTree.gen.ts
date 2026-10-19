@@ -15,7 +15,7 @@ import { Route as AppIndexRouteImport } from './routes/_app.index'
 import { Route as PublicLoginRouteImport } from './routes/_public.login'
 import { Route as PublicSetupRouteImport } from './routes/_public.setup'
 import { Route as AppAdminUsuariosRouteImport } from './routes/_app.admin.usuarios'
-import { Route as AppVendedorUuidRouteImport } from './routes/_app.vendedor.$uuid'
+import { Route as AppVendedorKeyUrlRouteImport } from './routes/_app.vendedor.$keyUrl'
 import { Route as PublicInvitacionTokenRouteImport } from './routes/_public.invitacion.$token'
 
 const AppRoute = AppRouteImport.update({
@@ -46,9 +46,9 @@ const AppAdminUsuariosRoute = AppAdminUsuariosRouteImport.update({
   path: '/admin/usuarios',
   getParentRoute: () => AppRoute,
 } as any)
-const AppVendedorUuidRoute = AppVendedorUuidRouteImport.update({
-  id: '/vendedor/$uuid',
-  path: '/vendedor/$uuid',
+const AppVendedorKeyUrlRoute = AppVendedorKeyUrlRouteImport.update({
+  id: '/vendedor/$keyUrl',
+  path: '/vendedor/$keyUrl',
   getParentRoute: () => AppRoute,
 } as any)
 const PublicInvitacionTokenRoute = PublicInvitacionTokenRouteImport.update({
@@ -62,7 +62,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof PublicLoginRoute
   '/setup': typeof PublicSetupRoute
   '/admin/usuarios': typeof AppAdminUsuariosRoute
-  '/vendedor/$uuid': typeof AppVendedorUuidRoute
+  '/vendedor/$keyUrl': typeof AppVendedorKeyUrlRoute
   '/invitacion/$token': typeof PublicInvitacionTokenRoute
 }
 export interface FileRoutesByTo {
@@ -70,7 +70,7 @@ export interface FileRoutesByTo {
   '/login': typeof PublicLoginRoute
   '/setup': typeof PublicSetupRoute
   '/admin/usuarios': typeof AppAdminUsuariosRoute
-  '/vendedor/$uuid': typeof AppVendedorUuidRoute
+  '/vendedor/$keyUrl': typeof AppVendedorKeyUrlRoute
   '/invitacion/$token': typeof PublicInvitacionTokenRoute
 }
 export interface FileRoutesById {
@@ -81,7 +81,7 @@ export interface FileRoutesById {
   '/_public/setup': typeof PublicSetupRoute
   '/_app/': typeof AppIndexRoute
   '/_app/admin/usuarios': typeof AppAdminUsuariosRoute
-  '/_app/vendedor/$uuid': typeof AppVendedorUuidRoute
+  '/_app/vendedor/$keyUrl': typeof AppVendedorKeyUrlRoute
   '/_public/invitacion/$token': typeof PublicInvitacionTokenRoute
 }
 export interface FileRouteTypes {
@@ -91,7 +91,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/setup'
     | '/admin/usuarios'
-    | '/vendedor/$uuid'
+    | '/vendedor/$keyUrl'
     | '/invitacion/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,7 +99,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/setup'
     | '/admin/usuarios'
-    | '/vendedor/$uuid'
+    | '/vendedor/$keyUrl'
     | '/invitacion/$token'
   id:
     | '__root__'
@@ -109,7 +109,7 @@ export interface FileRouteTypes {
     | '/_public/setup'
     | '/_app/'
     | '/_app/admin/usuarios'
-    | '/_app/vendedor/$uuid'
+    | '/_app/vendedor/$keyUrl'
     | '/_public/invitacion/$token'
   fileRoutesById: FileRoutesById
 }
@@ -162,11 +162,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminUsuariosRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/vendedor/$uuid': {
-      id: '/_app/vendedor/$uuid'
-      path: '/vendedor/$uuid'
-      fullPath: '/vendedor/$uuid'
-      preLoaderRoute: typeof AppVendedorUuidRouteImport
+    '/_app/vendedor/$keyUrl': {
+      id: '/_app/vendedor/$keyUrl'
+      path: '/vendedor/$keyUrl'
+      fullPath: '/vendedor/$keyUrl'
+      preLoaderRoute: typeof AppVendedorKeyUrlRouteImport
       parentRoute: typeof AppRoute
     }
     '/_public/invitacion/$token': {
@@ -182,13 +182,13 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
   AppAdminUsuariosRoute: typeof AppAdminUsuariosRoute
-  AppVendedorUuidRoute: typeof AppVendedorUuidRoute
+  AppVendedorKeyUrlRoute: typeof AppVendedorKeyUrlRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppIndexRoute: AppIndexRoute,
   AppAdminUsuariosRoute: AppAdminUsuariosRoute,
-  AppVendedorUuidRoute: AppVendedorUuidRoute,
+  AppVendedorKeyUrlRoute: AppVendedorKeyUrlRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
