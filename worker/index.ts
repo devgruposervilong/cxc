@@ -18,6 +18,12 @@ app.use("/api/*", async (c, next) => {
   await next();
 });
 
+// Auth solo por invitacion: el alta de usuarios se hace del lado servidor en
+// /api/setup y /api/invites/:token/accept. El endpoint publico se bloquea.
+app.all("/api/auth/sign-up/*", (c) =>
+  c.json({ error: "El registro publico esta deshabilitado" }, 403)
+);
+
 app.all("/api/auth/*", (c) => c.get("auth").handler(c.req.raw));
 
 app.route("/api", accountRoutes);
