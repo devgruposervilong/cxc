@@ -1,13 +1,9 @@
 import { useEffect, useState } from "react";
-import { Share, Smartphone, SquarePlus, X } from "lucide-react";
+import { Share, SquarePlus, X } from "lucide-react";
 import { useInstallPrompt } from "@/src/hooks/use-install-prompt";
 import { Button } from "./ui";
 
-export function InstallAppButton({
-  variant = "header",
-}: {
-  variant?: "header" | "auth";
-}) {
+export function InstallAppButton() {
   const { canPrompt, isInstalled, isIos, install } = useInstallPrompt();
   const [instructionsOpen, setInstructionsOpen] = useState(false);
   const [installing, setInstalling] = useState(false);
@@ -41,30 +37,29 @@ export function InstallAppButton({
 
   return (
     <>
-      {variant === "header" ? (
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center pb-[calc(1rem+env(safe-area-inset-bottom))]">
         <Button
-          variant="secondary"
-          size="sm"
+          variant="primary"
           onClick={() => void handleClick()}
           disabled={installing}
           aria-label={label}
-          title="Instalar CXC G&M en este dispositivo"
-          className="shrink-0 whitespace-nowrap"
+          className="pointer-events-auto gap-2.5 rounded-full px-5 py-2.5 text-sm shadow-xl shadow-zinc-900/30 ring-1 ring-white/10 active:scale-[0.98]"
         >
-          <Smartphone className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">{label}</span>
-        </Button>
-      ) : (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => void handleClick()}
-          disabled={installing}
-        >
-          <Smartphone className="h-4 w-4" />
+          <span className="relative flex h-5 w-5 items-center justify-center">
+            <img
+              src="/logo-mark-white.png"
+              alt=""
+              className="h-4 w-4"
+              draggable={false}
+            />
+            <span className="absolute -right-1 -top-1 flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-70" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
+            </span>
+          </span>
           {label}
         </Button>
-      )}
+      </div>
 
       {instructionsOpen && (
         <InstallInstructions

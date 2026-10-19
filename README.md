@@ -192,6 +192,7 @@ apuntan a esos archivos.
   one-time de maestros; la app en runtime no usa Prisma.
 - La PWA es "always online": el service worker solo existe para que la app
   sea instalable, no cachea datos de negocio.
-- La instalacion se maneja desde la app (`InstallAppButton`): captura
-  `beforeinstallprompt` cuando el navegador lo expone y muestra instrucciones
-  propias en iOS o cuando el navegador no dispara el evento.
+- La instalacion se maneja desde la app: un boton flotante (negro con
+  blanco) visible en todas las rutas mientras la app no este instalada,
+  captura `beforeinstallprompt` cuando el navegador lo expone y muestra
+  instrucciones propias en iOS o cuando el navegador no dispara el evento.

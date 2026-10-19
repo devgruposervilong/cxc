@@ -5,7 +5,6 @@ import { useSignOut } from "@/src/hooks/use-auth";
 import { useSellers } from "@/src/hooks/use-sellers";
 import type { Me } from "@/src/lib/api";
 import { ActiveSellersNav } from "./active-sellers-nav";
-import { InstallAppButton } from "./install-app-button";
 import { Button, cn } from "./ui";
 
 export function DashboardShell({
@@ -57,8 +56,6 @@ export function DashboardShell({
                 isSeller={isSeller}
                 sellerKeyUrl={me.seller?.keyUrl}
               />
-
-              <InstallAppButton />
 
               <div className="flex items-center gap-2">
                 {me.user.role === "admin" && (
