@@ -5,7 +5,10 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
+import { initInstallPrompt } from "./lib/install-prompt";
 import { routeTree } from "./routeTree.gen";
+
+initInstallPrompt();
 
 const queryClient = new QueryClient({
   defaultOptions: {

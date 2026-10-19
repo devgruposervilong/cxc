@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { InstallAppButton } from "./install-app-button";
 
 export function AuthLayout({
   title,
@@ -33,6 +34,10 @@ export function AuthLayout({
             <p className="mt-1 text-sm text-zinc-500">{subtitle}</p>
           )}
           <div className="mt-5">{children}</div>
+        </div>
+
+        <div className="mt-4 flex justify-center">
+          <InstallAppButton variant="auth" />
         </div>
       </div>
     </div>
