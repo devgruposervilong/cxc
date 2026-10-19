@@ -1,17 +1,23 @@
 import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
-import { Copy, Link2, Trash2, UserPlus } from "lucide-react";
 import {
-  adminCreateInvite,
-  adminDeleteInvite,
-  adminListInvites,
-  adminListUsers,
-  adminUpdateUser,
-  type AdminInvite,
-  type CreateInviteResult,
-} from "@/src/lib/api";
+  Copy,
+  Link2,
+  MessageCircle,
+  RefreshCw,
+  Trash2,
+  UserPlus,
+} from "lucide-react";
+import {
+  useAdminInvites,
+  useAdminUsers,
+  useCreateInvite,
+  useDeleteInvite,
+  useRegenerateInvite,
+  useUpdateUser,
+} from "@/src/hooks/use-admin";
+import type { AdminInvite, CreateInviteResult } from "@/src/lib/api";
 import {
   Alert,
   Button,
@@ -40,48 +46,21 @@ function roleLabel(role: string) {
   return "Usuario";
 }
 
+function whatsappInviteUrl(invite: CreateInviteResult) {
+  const text = `Hola, te comparto tu invitacion de CXC G&M (${invite.email}). Crea tu cuenta con este enlace: ${invite.inviteUrl}`;
+  return `https://wa.me/?text=${encodeURIComponent(text)}`;
+}
+
 export function AdminUsersPage({ currentUserId }: { currentUserId: string }) {
-  const queryClient = useQueryClient();
   const [lastInvite, setLastInvite] = useState<CreateInviteResult | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
 
-  const usersQuery = useQuery({
-    queryKey: ["admin", "users"] as const,
-    queryFn: adminListUsers,
-  });
-
-  const invitesQuery = useQuery({
-    queryKey: ["admin", "invites"] as const,
-    queryFn: adminListInvites,
-  });
-
-  const updateUser = useMutation({
-    mutationFn: ({
-      id,
-      input,
-    }: {
-      id: string;
-      input: Parameters<typeof adminUpdateUser>[1];
-    }) => adminUpdateUser(id, input),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["admin"] });
-    },
-  });
-
-  const createInvite = useMutation({
-    mutationFn: adminCreateInvite,
-    onSuccess: (data) => {
-      setLastInvite(data);
-      void queryClient.invalidateQueries({ queryKey: ["admin", "invites"] });
-    },
-  });
-
-  const deleteInvite = useMutation({
-    mutationFn: adminDeleteInvite,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["admin", "invites"] });
-    },
-  });
+  const usersQuery = useAdminUsers();
+  const invitesQuery = useAdminInvites();
+  const updateUser = useUpdateUser();
+  const createInvite = useCreateInvite();
+  const regenerateInvite = useRegenerateInvite();
+  const deleteInvite = useDeleteInvite();
 
   const form = useForm({
     defaultValues: {
@@ -97,6 +76,7 @@ export function AdminUsersPage({ currentUserId }: { currentUserId: string }) {
         sellerId: value.role === "seller" ? value.sellerId || null : null,
       });
       setLastInvite(result);
+      setCopied(null);
       form.reset();
     },
   });
@@ -114,6 +94,24 @@ export function AdminUsersPage({ currentUserId }: { currentUserId: string }) {
     } catch {
       setCopied(null);
     }
+  }
+
+  async function handleRegenerate(id: string) {
+    try {
+      const result = await regenerateInvite.mutateAsync(id);
+      setLastInvite(result);
+      setCopied(null);
+    } catch {
+      // El error se muestra con regenerateInvite.error.
+    }
+  }
+
+  function shareOnWhatsApp(invite: CreateInviteResult) {
+    window.open(
+      whatsappInviteUrl(invite),
+      "_blank",
+      "noopener,noreferrer"
+    );
   }
 
   return (
@@ -234,19 +232,20 @@ export function AdminUsersPage({ currentUserId }: { currentUserId: string }) {
           {lastInvite && (
             <div className="mt-4 flex flex-col gap-2">
               <Alert tone="success">
-                Enlace generado. Copialo y envialo: no se puede volver a
-                mostrar.
+                Enlace listo para {lastInvite.email}. Copialo o compartelo por
+                WhatsApp; por seguridad no se guarda en texto plano (puedes
+                regenerarlo desde la lista).
                 {!lastInvite.emailSent && (
                   <span className="mt-1 block text-xs">
                     No se envio correo automatico (Resend no configurado).
                   </span>
                 )}
               </Alert>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <input
                   readOnly
                   value={lastInvite.inviteUrl}
-                  className="w-full rounded-md border border-zinc-300 bg-zinc-50 px-3 py-2 text-xs text-zinc-600"
+                  className="w-full min-w-0 flex-1 rounded-md border border-zinc-300 bg-zinc-50 px-3 py-2 text-xs text-zinc-600"
                 />
                 <Button
                   variant="secondary"
@@ -255,6 +254,14 @@ export function AdminUsersPage({ currentUserId }: { currentUserId: string }) {
                 >
                   <Copy className="h-3.5 w-3.5" />
                   {copied === "last" ? "Copiado" : "Copiar"}
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => shareOnWhatsApp(lastInvite)}
+                >
+                  <MessageCircle className="h-3.5 w-3.5" />
+                  WhatsApp
                 </Button>
               </div>
             </div>
@@ -282,13 +289,24 @@ export function AdminUsersPage({ currentUserId }: { currentUserId: string }) {
                   <InviteRow
                     key={invite.id}
                     invite={invite}
-                    copied={copied === invite.id}
+                    regenerating={regenerateInvite.isPending}
+                    onRegenerate={() => void handleRegenerate(invite.id)}
                     onDelete={() => deleteInvite.mutate(invite.id)}
                   />
                 ))}
               </ul>
             )}
           </div>
+
+          {(regenerateInvite.error || deleteInvite.error) && (
+            <div className="mt-3">
+              <Alert tone="error">
+                {(regenerateInvite.error ?? deleteInvite.error) instanceof Error
+                  ? (regenerateInvite.error ?? deleteInvite.error)!.message
+                  : "No se pudo actualizar la invitacion"}
+              </Alert>
+            </div>
+          )}
         </Card>
       </div>
 
@@ -339,9 +357,7 @@ export function AdminUsersPage({ currentUserId }: { currentUserId: string }) {
                               updateUser.mutate({
                                 id: user.id,
                                 input: {
-                                  role: event.target.value as
-                                    | "admin"
-                                    | "user",
+                                  role: event.target.value as "admin" | "user",
                                 },
                               })
                             }
@@ -405,11 +421,13 @@ export function AdminUsersPage({ currentUserId }: { currentUserId: string }) {
 
 function InviteRow({
   invite,
-  copied,
+  regenerating,
+  onRegenerate,
   onDelete,
 }: {
   invite: AdminInvite;
-  copied: boolean;
+  regenerating: boolean;
+  onRegenerate: () => void;
   onDelete: () => void;
 }) {
   return (
@@ -423,10 +441,19 @@ function InviteRow({
           {invite.sellerName ? ` · ${invite.sellerName}` : ""} ·{" "}
           {invite.expired ? "Vencida" : "Vence"}{" "}
           {new Date(invite.expiresAt).toLocaleDateString("es-VE")}
-          {copied ? " · Copiado" : ""}
         </p>
       </div>
       <div className="flex items-center gap-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onRegenerate}
+          disabled={regenerating}
+          title="Emite un enlace nuevo y anula el anterior"
+        >
+          <RefreshCw className="h-3.5 w-3.5" />
+          Regenerar
+        </Button>
         <Button variant="ghost" size="sm" onClick={onDelete}>
           <Trash2 className="h-3.5 w-3.5" />
           Revocar

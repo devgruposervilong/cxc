@@ -1,11 +1,10 @@
 import { queryOptions } from "@tanstack/react-query";
 import { ApiError, getMe, type Me } from "./api";
-
-export const SESSION_QUERY_KEY = ["session"] as const;
+import { queryKeys } from "./query-keys";
 
 export function sessionQueryOptions() {
   return queryOptions({
-    queryKey: SESSION_QUERY_KEY,
+    queryKey: queryKeys.session,
     queryFn: async (): Promise<Me | null> => {
       try {
         return await getMe();

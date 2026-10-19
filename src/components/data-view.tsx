@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { Database, Download, Trash2 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { refreshMorosidad } from "@/lib/morosidad";
@@ -7,12 +6,10 @@ import { rankRows } from "@/lib/ranking";
 import { formatCurrency } from "@/lib/format";
 import type { DataRow, DocumentType } from "@/lib/types";
 import {
-  deleteDocumentFromUpload,
-  deleteUpload,
-  getLatestUpload,
-  saveUpload,
-} from "@/src/lib/api";
-import { UPLOAD_QUERY_KEY } from "@/src/lib/queries";
+  useDeleteDocument,
+  useDeleteUpload,
+  useSaveUpload,
+} from "@/src/hooks/use-uploads";
 import { usePanel } from "@/src/panel";
 import { CxcTable } from "./cxc-table";
 import { ClientCardsMobile } from "./client-cards-mobile";
@@ -39,13 +36,13 @@ export function DataView({ canManage }: { canManage: boolean }) {
 
   const [selectedVendedor, setSelectedVendedor] = useState<string | null>(null);
   const [selectedUnidad, setSelectedUnidad] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [saveStatus, setSaveStatus] = useState<{
     text: string;
     ok: boolean;
   } | null>(null);
-  const queryClient = useQueryClient();
+  const saveUploadMutation = useSaveUpload();
+  const deleteUploadMutation = useDeleteUpload();
+  const deleteDocumentMutation = useDeleteDocument();
 
   const unidades = useMemo(() => {
     const set = new Set<string>();
@@ -127,8 +124,7 @@ export function DataView({ canManage }: { canManage: boolean }) {
 
     if (!uploadId) return;
     try {
-      await deleteDocumentFromUpload(uploadId, type, numero);
-      queryClient.invalidateQueries({ queryKey: UPLOAD_QUERY_KEY });
+      await deleteDocumentMutation.mutateAsync({ uploadId, type, number: numero });
     } catch (error) {
       setSaveStatus({
         text:
@@ -191,35 +187,30 @@ export function DataView({ canManage }: { canManage: boolean }) {
 
   async function saveToDb() {
     if (!nombreArchivo || !cargadoEn) return;
-    setSaving(true);
     setSaveStatus(null);
     try {
-      const result = await saveUpload({
+      const { result, latest } = await saveUploadMutation.mutateAsync({
         fileName: nombreArchivo,
         loadedAt: cargadoEn,
         rows: filas,
       });
       setUploadId(result.uploadId);
 
-      const fresh = await getLatestUpload();
-      if (fresh && fresh.uploadId === result.uploadId) {
-        setFilas(refreshMorosidad(fresh.rows));
-        setNombreArchivo(fresh.fileName);
-        setCargadoEn(fresh.loadedAt);
+      if (latest && latest.uploadId === result.uploadId) {
+        setFilas(refreshMorosidad(latest.rows));
+        setNombreArchivo(latest.fileName);
+        setCargadoEn(latest.loadedAt);
       }
 
       setSaveStatus({
         text: `Guardado: ${result.savedRows} documentos`,
         ok: true,
       });
-      queryClient.invalidateQueries({ queryKey: UPLOAD_QUERY_KEY });
     } catch (error) {
       setSaveStatus({
         text: error instanceof Error ? error.message : "Error al guardar",
         ok: false,
       });
-    } finally {
-      setSaving(false);
     }
   }
 
@@ -228,20 +219,16 @@ export function DataView({ canManage }: { canManage: boolean }) {
       clearData();
       return;
     }
-    setDeleting(true);
     setSaveStatus(null);
     try {
-      await deleteUpload(uploadId);
+      await deleteUploadMutation.mutateAsync(uploadId);
       clearData();
       setSaveStatus({ text: "Carga eliminada", ok: true });
-      queryClient.invalidateQueries({ queryKey: UPLOAD_QUERY_KEY });
     } catch (error) {
       setSaveStatus({
         text: error instanceof Error ? error.message : "Error al eliminar",
         ok: false,
       });
-    } finally {
-      setDeleting(false);
     }
   }
 
@@ -262,7 +249,7 @@ export function DataView({ canManage }: { canManage: boolean }) {
             <>
               <Button
                 onClick={saveToDb}
-                disabled={saving || uploadId !== null}
+                disabled={saveUploadMutation.isPending || uploadId !== null}
                 title={
                   uploadId
                     ? "Esta carga ya esta guardada en la base de datos"
@@ -270,15 +257,19 @@ export function DataView({ canManage }: { canManage: boolean }) {
                 }
               >
                 <Database className="h-4 w-4" />
-                {saving ? "GUARDANDO..." : uploadId ? "YA GUARDADO" : "GUARDAR"}
+                {saveUploadMutation.isPending
+                  ? "GUARDANDO..."
+                  : uploadId
+                    ? "YA GUARDADO"
+                    : "GUARDAR"}
               </Button>
               <Button
                 variant="danger"
                 onClick={handleDeleteAll}
-                disabled={deleting}
+                disabled={deleteUploadMutation.isPending}
               >
                 <Trash2 className="h-4 w-4" />
-                {deleting ? "ELIMINANDO..." : "ELIMINAR"}
+                {deleteUploadMutation.isPending ? "ELIMINANDO..." : "ELIMINAR"}
               </Button>
             </>
           )}

@@ -134,6 +134,7 @@ export type AdminInvite = {
 };
 
 export type CreateInviteResult = {
+  email: string;
   inviteUrl: string;
   emailSent: boolean;
   expiresAt: string;
@@ -262,4 +263,11 @@ export function adminDeleteInvite(id: string) {
   return apiFetch<{ deleted: boolean }>(`/api/admin/invites/${id}`, {
     method: "DELETE",
   });
+}
+
+export function adminRegenerateInvite(id: string) {
+  return apiFetch<CreateInviteResult>(
+    `/api/admin/invites/${encodeURIComponent(id)}/regenerate`,
+    { method: "POST" }
+  );
 }

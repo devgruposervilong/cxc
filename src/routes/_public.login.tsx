@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
-import { authClient } from "@/src/lib/auth-client";
-import { sessionQueryOptions, SESSION_QUERY_KEY } from "@/src/lib/session";
+import { useSignIn } from "@/src/hooks/use-auth";
 import { AuthLayout } from "@/src/components/auth-layout";
 import { Alert, Button, TextField, fieldErrors } from "@/src/components/ui";
 
@@ -23,9 +21,9 @@ const loginSchema = z.object({
 });
 
 function LoginPage() {
-  const queryClient = useQueryClient();
   const search = Route.useSearch();
   const [error, setError] = useState<string | null>(null);
+  const signIn = useSignIn();
 
   const form = useForm({
     defaultValues: { email: "", password: "" },
@@ -33,17 +31,10 @@ function LoginPage() {
     onSubmit: async ({ value }) => {
       setError(null);
       try {
-        const result = await authClient.signIn.email({
+        const me = await signIn.mutateAsync({
           email: value.email.trim().toLowerCase(),
           password: value.password,
         });
-
-        if (result.error) {
-          throw new Error(result.error.message ?? "Credenciales invalidas");
-        }
-
-        await queryClient.invalidateQueries({ queryKey: SESSION_QUERY_KEY });
-        const me = await queryClient.fetchQuery(sessionQueryOptions());
 
         if (me?.user.role === "seller" && me.seller) {
           window.location.assign(search.redirect ?? `/vendedor/${me.seller.keyUrl}`);

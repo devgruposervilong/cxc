@@ -1,24 +1,17 @@
 import { useState } from "react";
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { queryOptions, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
-import { getSetupStatus, setupAdmin } from "@/src/lib/api";
-import { sessionQueryOptions, SESSION_QUERY_KEY } from "@/src/lib/session";
+import { useSetupAdmin } from "@/src/hooks/use-setup";
+import { setupStatusQueryOptions } from "@/src/lib/queries";
 import { AuthLayout } from "@/src/components/auth-layout";
 import { Alert, Button, TextField, fieldErrors } from "@/src/components/ui";
 
-const setupStatusQuery = () =>
-  queryOptions({
-    queryKey: ["setup", "status"] as const,
-    queryFn: getSetupStatus,
-    staleTime: 0,
-    retry: false,
-  });
-
 export const Route = createFileRoute("/_public/setup")({
   beforeLoad: async ({ context }) => {
-    const status = await context.queryClient.ensureQueryData(setupStatusQuery());
+    const status = await context.queryClient.ensureQueryData(
+      setupStatusQueryOptions()
+    );
     if (!status.needsSetup) {
       throw redirect({ to: "/login" });
     }
@@ -34,8 +27,8 @@ const setupSchema = z.object({
 });
 
 function SetupPage() {
-  const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
+  const setup = useSetupAdmin();
 
   const form = useForm({
     defaultValues: { token: "", name: "", email: "", password: "" },
@@ -43,15 +36,13 @@ function SetupPage() {
     onSubmit: async ({ value }) => {
       setError(null);
       try {
-        await setupAdmin({
+        await setup.mutateAsync({
           token: value.token,
           name: value.name,
           email: value.email.trim().toLowerCase(),
           password: value.password,
         });
 
-        await queryClient.invalidateQueries({ queryKey: SESSION_QUERY_KEY });
-        await queryClient.fetchQuery(sessionQueryOptions());
         window.location.assign("/");
       } catch (caught) {
         setError(

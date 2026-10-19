@@ -1,4 +1,4 @@
-import { and, count, desc, eq, gt, isNull } from "drizzle-orm";
+import { and, count, desc, eq, gt, isNull, ne } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
 import { sendInviteEmail } from "../email";
@@ -297,7 +297,104 @@ app.post("/invites", async (c) => {
     console.error("sendInviteEmail failed:", error);
   }
 
-  return c.json({ inviteUrl, emailSent, expiresAt: expiresAt.toISOString() }, 201);
+  return c.json(
+    { email, inviteUrl, emailSent, expiresAt: expiresAt.toISOString() },
+    201
+  );
+});
+
+// POST /api/admin/invites/:id/regenerate
+// Emite un token nuevo para una invitacion pendiente y invalida el anterior.
+app.post("/invites/:id/regenerate", async (c) => {
+  const db = c.get("db");
+  const current = c.get("session");
+  const id = c.req.param("id");
+
+  const [row] = await db
+    .select()
+    .from(invite)
+    .where(eq(invite.id, id))
+    .limit(1);
+
+  if (!row) {
+    return c.json({ error: "Invitacion no encontrada" }, 404);
+  }
+  if (row.acceptedAt) {
+    return c.json({ error: "La invitacion ya fue aceptada" }, 409);
+  }
+
+  const [existingUser] = await db
+    .select({ id: user.id })
+    .from(user)
+    .where(eq(user.email, row.email))
+    .limit(1);
+
+  if (existingUser) {
+    return c.json({ error: "El correo ya tiene una cuenta" }, 409);
+  }
+
+  if (row.role === "seller" && row.sellerId) {
+    const [sellerRow] = await db
+      .select()
+      .from(seller)
+      .where(eq(seller.id, row.sellerId))
+      .limit(1);
+
+    if (!sellerRow) {
+      return c.json({ error: "Vendedor no encontrado" }, 404);
+    }
+    if (sellerRow.userId) {
+      return c.json({ error: "El vendedor ya tiene un usuario" }, 409);
+    }
+
+    const [otherPending] = await db
+      .select({ id: invite.id })
+      .from(invite)
+      .where(
+        and(
+          eq(invite.sellerId, row.sellerId),
+          isNull(invite.acceptedAt),
+          gt(invite.expiresAt, new Date()),
+          ne(invite.id, row.id)
+        )
+      )
+      .limit(1);
+
+    if (otherPending) {
+      return c.json(
+        { error: "El vendedor ya tiene otra invitacion pendiente" },
+        409
+      );
+    }
+  }
+
+  const token = generateInviteToken();
+  const tokenHash = await hashToken(token);
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+  await db
+    .update(invite)
+    .set({ tokenHash, expiresAt, createdBy: current.user.id })
+    .where(eq(invite.id, row.id));
+
+  const inviteUrl = `${new URL(c.req.url).origin}/invitacion/${token}`;
+  let emailSent = false;
+  try {
+    emailSent = await sendInviteEmail(c.env, {
+      to: row.email,
+      inviteUrl,
+      role: row.role,
+    });
+  } catch (error) {
+    console.error("sendInviteEmail failed:", error);
+  }
+
+  return c.json({
+    email: row.email,
+    inviteUrl,
+    emailSent,
+    expiresAt: expiresAt.toISOString(),
+  });
 });
 
 // DELETE /api/admin/invites/:id

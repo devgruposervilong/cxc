@@ -132,10 +132,12 @@ Excel se sube desde la app nueva.
 - **seller**: solo su propio portal `/vendedor/:keyUrl`.
 
 Los usuarios se crean desde `/admin/usuarios` -> *Nueva invitacion*. Se genera
-un enlace de un solo uso que vence en 7 dias; **copiarlo y enviarlo a mano**
-no se vuelve a mostrar. Si `RESEND_API_KEY` y `EMAIL_FROM` estan configurados,
-ademas se envia por correo (requiere dominio verificado; mientras no haya
-dominio, el correo queda deshabilitado).
+un enlace de un solo uso que vence en 7 dias; **copiarlo o compartirlo por
+WhatsApp** no se vuelve a mostrar en texto plano. Si se pierde, la lista de
+invitaciones pendientes permite *Regenerar* el enlace (anula el anterior y crea
+uno nuevo) o *Revocar* la invitacion. Si `RESEND_API_KEY` y `EMAIL_FROM` estan
+configurados, ademas se envia por correo (requiere dominio verificado; mientras
+no haya dominio, el correo queda deshabilitado).
 
 El administrador puede cambiar roles, bloquear/desbloquear cuentas y revocar
 invitaciones pendientes.
@@ -155,8 +157,9 @@ worker/
 drizzle/                migraciones SQL de D1
 src/
   routes/               TanStack Router (file-based)
+  hooks/                use* con TanStack Query (unico consumidor de lib/api.ts)
   components/           dashboard, tabla TanStack, portal, admin
-  lib/                  cliente API, sesion, queries
+  lib/                  cliente API (fetch), sesion, query keys y query options
   panel.tsx             estado del panel principal
 lib/                    logica de negocio compartida (morosidad, ranking, etc.)
 scripts/export-masters.ts  exportacion one-time desde Postgres

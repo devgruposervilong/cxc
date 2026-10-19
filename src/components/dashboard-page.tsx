@@ -1,5 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
-import { uploadQueryOptions } from "@/src/lib/queries";
+import { useLatestUpload } from "@/src/hooks/use-uploads";
 import { PanelProvider, usePanel } from "@/src/panel";
 import { DataView } from "./data-view";
 import { FileUpload } from "./file-upload";
@@ -15,9 +14,7 @@ function PanelContent({ canManage }: { canManage: boolean }) {
 }
 
 export function DashboardPage({ canManage }: { canManage: boolean }) {
-  const { data, isPending, isError, error, refetch } = useQuery(
-    uploadQueryOptions()
-  );
+  const { data, isPending, isError, error, refetch } = useLatestUpload();
 
   if (isPending) {
     return (

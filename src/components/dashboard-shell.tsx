@@ -1,10 +1,8 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
 import { BarChart3, LogOut, Shield } from "lucide-react";
 import type { Seller } from "@/lib/types";
-import { authClient } from "@/src/lib/auth-client";
-import { sellersQueryOptions } from "@/src/lib/queries";
+import { useSignOut } from "@/src/hooks/use-auth";
+import { useSellers } from "@/src/hooks/use-sellers";
 import type { Me } from "@/src/lib/api";
 import { ActiveSellersNav } from "./active-sellers-nav";
 import { Button, cn } from "./ui";
@@ -16,24 +14,12 @@ export function DashboardShell({
   me: Me;
   children: React.ReactNode;
 }) {
-  const queryClient = useQueryClient();
   const { pathname } = useLocation();
   const isSeller = me.user.role === "seller";
 
-  const [signingOut, setSigningOut] = useState(false);
-  const sellersQuery = useQuery(sellersQueryOptions(!isSeller));
+  const signOut = useSignOut();
+  const sellersQuery = useSellers(!isSeller);
   const sellers: Seller[] = sellersQuery.data ?? [];
-
-  async function signOut() {
-    setSigningOut(true);
-    try {
-      await authClient.signOut();
-      queryClient.clear();
-      window.location.assign("/login");
-    } finally {
-      setSigningOut(false);
-    }
-  }
 
   const roleLabel =
     me.user.role === "admin"
@@ -94,13 +80,13 @@ export function DashboardShell({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={signOut}
-                  disabled={signingOut}
+                  onClick={() => signOut.mutate()}
+                  disabled={signOut.isPending}
                   title="Cerrar sesion"
                 >
                   <LogOut className="h-4 w-4" />
                   <span className="hidden sm:inline">
-                    {signingOut ? "Saliendo..." : "Salir"}
+                    {signOut.isPending ? "Saliendo..." : "Salir"}
                   </span>
                 </Button>
               </div>

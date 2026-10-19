@@ -14,7 +14,10 @@ Hono, D1 + Drizzle y Better Auth. La app Next.js anterior sigue en `main`
 ## Convenciones
 
 - Frontend: TanStack Router file-based (`src/routes`), Query, Table y Form.
-  El alias `@/` apunta a la raiz del repo (no a `src/`).
+  El alias `@/` apunta a la raiz del repo (no a `src/`). Los componentes usan
+  hooks de `src/hooks` (TanStack Query); el unico lugar con `fetch` es
+  `src/lib/api.ts`. Los guards de rutas usan `queryClient.ensureQueryData` con
+  las query options de `src/lib/queries.ts` y claves de `src/lib/query-keys.ts`.
 - Backend: rutas Hono en `worker/routes`, logica en `worker/services`, acceso
   a datos en `worker/repositories`. **No usar Prisma en runtime.**
 - D1: ids cuid2, totales en `REAL`, migraciones versionadas en `drizzle/`.

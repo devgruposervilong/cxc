@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
-import { acceptInvite, getInvite } from "@/src/lib/api";
-import { sessionQueryOptions, SESSION_QUERY_KEY } from "@/src/lib/session";
+import { useAcceptInvite, useInvite } from "@/src/hooks/use-invites";
 import { AuthLayout } from "@/src/components/auth-layout";
 import { Alert, Button, TextField, fieldErrors } from "@/src/components/ui";
 
@@ -20,14 +18,10 @@ const inviteSchema = z.object({
 
 function InvitePage() {
   const { token } = Route.useParams();
-  const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
 
-  const inviteQuery = useQuery({
-    queryKey: ["invite", token] as const,
-    queryFn: () => getInvite(token),
-    retry: false,
-  });
+  const inviteQuery = useInvite(token);
+  const acceptInviteMutation = useAcceptInvite(token);
 
   const form = useForm({
     defaultValues: { name: "", password: "", confirm: "" },
@@ -40,13 +34,10 @@ function InvitePage() {
     onSubmit: async ({ value }) => {
       setError(null);
       try {
-        await acceptInvite(token, {
+        const me = await acceptInviteMutation.mutateAsync({
           name: value.name,
           password: value.password,
         });
-
-        await queryClient.invalidateQueries({ queryKey: SESSION_QUERY_KEY });
-        const me = await queryClient.fetchQuery(sessionQueryOptions());
 
         if (me?.user.role === "seller" && me.seller) {
           window.location.assign(`/vendedor/${me.seller.keyUrl}`);
