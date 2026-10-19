@@ -165,6 +165,25 @@ lib/                    logica de negocio compartida (morosidad, ranking, etc.)
 scripts/export-masters.ts  exportacion one-time desde Postgres
 ```
 
+## Assets de marca
+
+El logo original esta en `assets/logo-original.png`. En `public/` viven las
+variantes generadas a partir de el:
+
+- `favicon.ico` (16/32/48/256) + `favicon-16x16.png` y `favicon-32x32.png`.
+- `apple-touch-icon.png` (180, iOS) e `icons/mstile-150x150.png` con
+  `browserconfig.xml` (Windows).
+- `icons/icon-192.png` e `icons/icon-512.png` (PWA `any`),
+  `icons/maskable-192.png` y `icons/maskable-512.png` (`maskable`) e
+  `icons/monochrome-512.png` (iconos tematicos de Android).
+- `logo.png` / `logo-mark.png` (tinta negra transparente) y
+  `logo-white.png` / `logo-mark-white.png` (blancos, para fondos oscuros).
+- `og-image.png` (1200x630) para la vista previa al compartir enlaces.
+
+Si el logo cambia hay que regenerar estas variantes conservando nombres y
+tamanos: el manifest (`vite.config.ts`) y los `<link>` de `index.html` ya
+apuntan a esos archivos.
+
 ## Notas
 
 - `worker-configuration.d.ts` se regenera con `npm run cf-typegen`; incluye

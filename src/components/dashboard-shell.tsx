@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { BarChart3, LogOut, Shield } from "lucide-react";
+import { LogOut, Shield } from "lucide-react";
 import type { Seller } from "@/lib/types";
 import { useSignOut } from "@/src/hooks/use-auth";
 import { useSellers } from "@/src/hooks/use-sellers";
@@ -34,8 +34,13 @@ export function DashboardShell({
         <header className="shrink-0 border-b border-zinc-200 bg-white/80 px-4 py-3 backdrop-blur md:px-6 md:py-4">
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
             <div className="flex min-w-0 items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-900 text-white">
-                <BarChart3 className="h-5 w-5" />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-900">
+                <img
+                  src="/logo-mark-white.png"
+                  alt=""
+                  className="h-6 w-6"
+                  draggable={false}
+                />
               </div>
               <div className="min-w-0">
                 <h1 className="truncate text-xl font-semibold text-zinc-900">
