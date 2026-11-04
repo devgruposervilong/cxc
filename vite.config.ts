@@ -5,7 +5,6 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { cloudflare } from "@cloudflare/vite-plugin";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
-import { VitePWA } from "vite-plugin-pwa";
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 
@@ -20,69 +19,6 @@ export default defineConfig({
     react(),
     tailwindcss(),
     cloudflare(),
-    VitePWA({
-      registerType: "autoUpdate",
-      injectRegister: "auto",
-      includeAssets: [
-        "favicon.ico",
-        "favicon-16x16.png",
-        "favicon-32x32.png",
-        "apple-touch-icon.png",
-        "browserconfig.xml",
-        "icons/*.png",
-        "logo*.png",
-      ],
-      manifest: {
-        id: "/",
-        name: "CXC G&M",
-        short_name: "CxC",
-        description: "Dashboard de cuentas por cobrar",
-        lang: "es",
-        categories: ["business", "finance", "productivity"],
-        theme_color: "#18181b",
-        background_color: "#ffffff",
-        display: "standalone",
-        start_url: "/",
-        scope: "/",
-        icons: [
-          {
-            src: "/icons/icon-192.png",
-            sizes: "192x192",
-            type: "image/png",
-            purpose: "any",
-          },
-          {
-            src: "/icons/icon-512.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "any",
-          },
-          {
-            src: "/icons/maskable-192.png",
-            sizes: "192x192",
-            type: "image/png",
-            purpose: "maskable",
-          },
-          {
-            src: "/icons/maskable-512.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "maskable",
-          },
-          {
-            src: "/icons/monochrome-512.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "monochrome",
-          },
-        ],
-      },
-      workbox: {
-        navigateFallback: "/index.html",
-        navigateFallbackDenylist: [/^\/api\//],
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
-      },
-    }),
   ],
   resolve: {
     alias: {

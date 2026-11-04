@@ -1,8 +1,8 @@
 # CXC G&M
 
 Dashboard de cuentas por cobrar. Esta rama (`cloudflare-vite-pwa`) es la
-version nueva: React + Vite (PWA) en el navegador y un Worker de Cloudflare
-con Hono + D1 (SQLite) + Drizzle ORM + Better Auth.
+version nueva: React + Vite en el navegador (por ahora sin PWA) y un Worker de
+Cloudflare con Hono + D1 (SQLite) + Drizzle ORM + Better Auth.
 
 La version anterior (Next.js + Prisma/PostgreSQL sobre Vercel) sigue intacta
 en la rama `main`. Ambas conviven hasta que la nueva este estable.
@@ -10,7 +10,7 @@ en la rama `main`. Ambas conviven hasta que la nueva este estable.
 ## Stack
 
 - **Frontend**: React 19 + Vite, TanStack Router, Query, Table y Form, Zod,
-  Tailwind CSS 4, `vite-plugin-pwa`.
+  Tailwind CSS 4.
 - **Backend**: Cloudflare Worker + Hono en `/api/*`.
 - **Base de datos**: Cloudflare D1 (SQLite) con Drizzle y migraciones SQL en
   `drizzle/`.
@@ -178,16 +178,15 @@ variantes generadas a partir de el:
 - `favicon.ico` (16/32/48/256) + `favicon-16x16.png` y `favicon-32x32.png`.
 - `apple-touch-icon.png` (180, iOS) e `icons/mstile-150x150.png` con
   `browserconfig.xml` (Windows).
-- `icons/icon-192.png` e `icons/icon-512.png` (PWA `any`),
-  `icons/maskable-192.png` y `icons/maskable-512.png` (`maskable`) e
-  `icons/monochrome-512.png` (iconos tematicos de Android).
+- `icons/icon-192.png`, `icons/icon-512.png`, `icons/maskable-192.png`,
+  `icons/maskable-512.png` e `icons/monochrome-512.png`: iconos de la PWA
+  anterior, reservados por si se vuelve a activar.
 - `logo.png` / `logo-mark.png` (tinta negra transparente) y
   `logo-white.png` / `logo-mark-white.png` (blancos, para fondos oscuros).
 - `og-image.png` (1200x630) para la vista previa al compartir enlaces.
 
 Si el logo cambia hay que regenerar estas variantes conservando nombres y
-tamanos: el manifest (`vite.config.ts`) y los `<link>` de `index.html` ya
-apuntan a esos archivos.
+tamanos: los `<link>` de `index.html` ya apuntan a esos archivos.
 
 ## Notas
 
@@ -195,9 +194,7 @@ apuntan a esos archivos.
   los bindings y los secretos de `.dev.vars`.
 - `prisma/` y `scripts/export-masters.ts` existen solo para la migracion
   one-time de maestros; la app en runtime no usa Prisma.
-- La PWA es "always online": el service worker solo existe para que la app
-  sea instalable, no cachea datos de negocio.
-- La instalacion se maneja desde la app: un boton flotante (negro con
-  blanco) visible en todas las rutas mientras la app no este instalada,
-  captura `beforeinstallprompt` cuando el navegador lo expone y muestra
-  instrucciones propias en iOS o cuando el navegador no dispara el evento.
+- La PWA esta desactivada por ahora: no hay manifest, service worker ni
+  prompt de instalacion. `public/sw.js` es una limpieza temporal que
+  desregistra la PWA en clientes que ya la habian instalado; se puede borrar
+  cuando ya no queden clientes con esa version.

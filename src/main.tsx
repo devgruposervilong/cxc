@@ -5,10 +5,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
-import { initInstallPrompt } from "./lib/install-prompt";
 import { routeTree } from "./routeTree.gen";
-
-initInstallPrompt();
 
 // Tras un deploy los assets viejos dejan de existir y el servidor responde
 // con el index.html (fallback SPA), por lo que una pestana abierta con la
@@ -28,13 +25,23 @@ window.addEventListener("vite:preloadError", (event) => {
   window.location.reload();
 });
 
-// Cuando el service worker nuevo toma el control, la pagina sigue ejecutando
-// el bundle anterior: recargamos para que la actualizacion se aplique.
+// Limpieza temporal al retirar la PWA: desregistra el service worker anterior
+// y borra sus caches. Se puede eliminar cuando ya no queden clientes con la
+// version PWA instalada.
 if ("serviceWorker" in navigator) {
-  const hadController = Boolean(navigator.serviceWorker.controller);
-  navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (hadController) window.location.reload();
-  });
+  void navigator.serviceWorker
+    .getRegistrations()
+    .then((registrations) =>
+      Promise.all(registrations.map((registration) => registration.unregister()))
+    )
+    .catch(() => {});
+}
+
+if ("caches" in window) {
+  void caches
+    .keys()
+    .then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
+    .catch(() => {});
 }
 
 const queryClient = new QueryClient({
