@@ -77,15 +77,46 @@ function cleanRow(row: Record<string, unknown>) {
 }
 
 // Las filas "cliente" del archivo traen el RIF en TIPO y el nombre en NUMERO.
-function buildClientMap(data: Record<string, unknown>[]): Map<string, string> {
-  const map = new Map<string, string>();
+// El reporte suele anteponer un caracter al RIF en esa cabecera (de ahi el
+// slice(1) historico); se indexan ambas variantes para tolerar diferencias de
+// formato entre la cabecera y la observacion del documento.
+type ClientRef = {
+  name: string;
+  rif: string;
+};
+
+function clientKey(value: string): string {
+  return value.trim().toUpperCase();
+}
+
+function buildClientMap(data: Record<string, unknown>[]): Map<string, ClientRef> {
+  const map = new Map<string, ClientRef>();
   for (const row of data) {
     if (IGNORED_TIPOS.includes(String(row.TIPO ?? "").trim())) continue;
     const rif = String(row.TIPO ?? "").trim();
     const name = String(row.NUMERO ?? "").trim();
-    if (rif && name) map.set(rif.slice(1), name);
+    if (!rif || !name) continue;
+
+    const client = { name, rif };
+    const key = clientKey(rif);
+    map.set(key, client);
+    if (key.length > 1) map.set(key.slice(1), client);
   }
   return map;
+}
+
+function findClientByRif(
+  map: Map<string, ClientRef>,
+  rif: string | null
+): ClientRef | null {
+  if (!rif) return null;
+  const key = clientKey(rif);
+  if (!key) return null;
+  return (
+    map.get(key) ??
+    (key.length > 1 ? map.get(key.slice(1)) : undefined) ??
+    null
+  );
 }
 
 // Fuente de verdad de la app: retorna las filas ya limpias y ranqueadas.
@@ -101,18 +132,32 @@ export async function processFile(file: File): Promise<DataRow[]> {
   });
 
   const clientMap = buildClientMap(data);
-  const documentRows = data.filter(
-    (row) => row.TIPO === "FACT" || row.TIPO === "N/CR"
-  );
+  const rows: DataRow[] = [];
+  let currentClient: ClientRef | null = null;
 
-  const rows: DataRow[] = documentRows.map((row) => {
-    const cleaned = cleanRow(row);
-    return {
-      ...cleaned,
-      rank: 0,
-      client: cleaned.rif ? clientMap.get(cleaned.rif.slice(1)) ?? null : null,
-    };
-  });
+  for (const row of data) {
+    const tipo = String(row.TIPO ?? "").trim();
+
+    if (tipo === "FACT" || tipo === "N/CR") {
+      const cleaned = cleanRow(row);
+      // Si el RIF de la observacion no aparece en el mapa, se usa la ultima
+      // cabecera de cliente del reporte. Asi el documento conserva nombre y
+      // RIF, y el guardado puede crear el cliente si no existe en el maestro.
+      const client = findClientByRif(clientMap, cleaned.rif) ?? currentClient;
+      rows.push({
+        ...cleaned,
+        rank: 0,
+        client: client?.name ?? null,
+        rif: cleaned.rif ?? client?.rif ?? null,
+      });
+      continue;
+    }
+
+    if (IGNORED_TIPOS.includes(tipo)) continue;
+
+    const name = String(row.NUMERO ?? "").trim();
+    if (tipo && name) currentClient = { name, rif: tipo };
+  }
 
   return rankRows(rows);
 }

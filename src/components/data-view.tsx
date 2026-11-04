@@ -203,7 +203,15 @@ export function DataView({ canManage }: { canManage: boolean }) {
       }
 
       setSaveStatus({
-        text: `Guardado: ${result.savedRows} documentos`,
+        text: `Guardado: ${result.savedRows} documentos${
+          result.createdClients > 0
+            ? ` · ${result.createdClients} ${
+                result.createdClients === 1
+                  ? "cliente nuevo"
+                  : "clientes nuevos"
+              }`
+            : ""
+        }`,
         ok: true,
       });
     } catch (error) {

@@ -22,9 +22,20 @@ export interface DocumentRepository {
   deleteDocumentsByUpload(uploadId: string): Promise<void>;
 }
 
+export type EnsureClientInput = {
+  name: string;
+  rif: string;
+  seller?: string | null;
+  businessUnit?: string | null;
+};
+
 // Maestro de clientes: fuente de verdad de seller y businessUnit.
 export interface ClientRepository {
   getClients(): Promise<Client[]>;
+  // Crea solo los clientes que no existan (por nombre o RIF) y devuelve
+  // cuantos se insertaron. Es idempotente: guardar la misma carga dos veces
+  // no duplica el maestro.
+  ensureClients(clients: EnsureClientInput[]): Promise<number>;
 }
 
 // Maestro de vendedores: keyUrl es la clave de la URL pública por vendedor.

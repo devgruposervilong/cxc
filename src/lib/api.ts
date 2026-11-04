@@ -71,6 +71,7 @@ export type SaveUploadInput = {
 export type SaveUploadResult = {
   uploadId: string;
   savedRows: number;
+  createdClients: number;
 };
 
 export type SellerPortal = {

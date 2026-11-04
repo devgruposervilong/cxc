@@ -105,6 +105,11 @@ existe ningun usuario).
 Solo se migran los maestros. `upload` y `document` arrancan vacios: el primer
 Excel se sube desde la app nueva.
 
+Los clientes que aparezcan en el Excel y no existan en el maestro se crean
+automaticamente al guardar la carga. Se usan el nombre y el RIF de la limpieza
+del archivo; si el documento trae vendedor, tambien se guarda, y la unidad de
+negocio queda vacia hasta que se complete en el maestro.
+
 1. En `.env` (no se despliega) debe estar el `DATABASE_URL` de Prisma
    Accelerate del proyecto anterior.
 2. Generar el cliente de Prisma y exportar:

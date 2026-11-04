@@ -1,4 +1,8 @@
-import type { Client, DataRow } from "@/lib/types";
+import {
+  normalizeClientName,
+  type Client,
+  type DataRow,
+} from "@/lib/types";
 import type { Db } from "../db/client";
 import { DrizzleClientRepository } from "../repositories/drizzle-client-repository";
 import { DrizzleDocumentRepository } from "../repositories/drizzle-document-repository";
@@ -11,12 +15,10 @@ export type LoadedUpload = {
   rows: DataRow[];
 };
 
-function normalizeName(value: string | null): string {
-  return value?.trim().toUpperCase() ?? "";
-}
-
 function buildClientIndex(clients: Client[]): Map<string, Client> {
-  return new Map(clients.map((client) => [normalizeName(client.name), client]));
+  return new Map(
+    clients.map((client) => [normalizeClientName(client.name), client])
+  );
 }
 
 // El vendedor sale del maestro de clientes (fuente de verdad); si el
@@ -24,7 +26,7 @@ function buildClientIndex(clients: Client[]): Map<string, Client> {
 function enrichRows(rows: DataRow[], clients: Client[]): DataRow[] {
   const index = buildClientIndex(clients);
   return rows.map((row) => {
-    const master = index.get(normalizeName(row.client));
+    const master = index.get(normalizeClientName(row.client));
     return {
       ...row,
       seller: master?.seller ?? row.seller,
