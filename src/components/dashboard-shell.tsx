@@ -31,13 +31,13 @@ export function DashboardShell({
   return (
     <div className="flex min-h-screen justify-center bg-zinc-50 md:h-screen md:overflow-hidden">
       <div className="flex w-full flex-col md:w-[80%]">
-        <header className="shrink-0 border-b border-zinc-200 bg-white/80 px-4 py-3 backdrop-blur md:px-6 md:py-4">
+        <header className="relative z-40 shrink-0 border-b border-zinc-200 bg-white/80 px-4 py-3 backdrop-blur md:px-6 md:py-4">
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
             <Link
               to="/"
               aria-label="Ir al inicio"
               title="Ir al inicio"
-              className="flex min-w-0 shrink-0 items-center gap-3 rounded-xl transition hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2"
+              className="flex min-w-0 shrink-0 cursor-pointer items-center gap-3 rounded-xl transition hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2"
             >
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-900">
                 <img
@@ -69,7 +69,7 @@ export function DashboardShell({
                     aria-label="Usuarios"
                     title="Usuarios"
                     className={cn(
-                      "inline-flex h-8 w-8 items-center justify-center rounded-md transition",
+                      "inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-md transition",
                       pathname === "/admin/usuarios"
                         ? "bg-zinc-900 text-white"
                         : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"

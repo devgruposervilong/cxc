@@ -96,7 +96,7 @@ export function CxcTable({
               onClick={() =>
                 onDelete(row.original.type, row.original.number)
               }
-              className="rounded p-1 text-zinc-400 transition hover:bg-red-50 hover:text-red-600"
+              className="cursor-pointer rounded p-1 text-zinc-400 transition hover:bg-red-50 hover:text-red-600"
               aria-label="Eliminar documento"
               title="Eliminar documento"
             >
@@ -115,6 +115,7 @@ export function CxcTable({
     data: rows,
     columns,
     state: tableState,
+    groupedColumnMode: false,
     getCoreRowModel: getCoreRowModel(),
     getGroupedRowModel: getGroupedRowModel(),
   });
