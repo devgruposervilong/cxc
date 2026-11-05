@@ -45,7 +45,7 @@ export function Button({
     <button
       {...props}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-md font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60",
+        "inline-flex cursor-pointer items-center justify-center gap-2 rounded-md font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60",
         buttonVariants[variant],
         buttonSizes[size],
         className
@@ -100,7 +100,7 @@ export function SelectField({
       <select
         {...props}
         className={cn(
-          "rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm transition focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500",
+          "cursor-pointer rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm transition focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500",
           error && "border-red-400",
           className
         )}

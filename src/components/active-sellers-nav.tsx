@@ -50,7 +50,7 @@ export function ActiveSellersNav({
         <Link
           to="/vendedor/$keyUrl"
           params={{ keyUrl: sellerKeyUrl }}
-          className="text-sm font-medium text-zinc-600 transition hover:text-zinc-900 hover:underline"
+          className="cursor-pointer text-sm font-medium text-zinc-600 transition hover:text-zinc-900 hover:underline"
         >
           Mi portal
         </Link>
@@ -69,7 +69,7 @@ export function ActiveSellersNav({
         aria-expanded={open}
         title="Ver vendedores"
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium transition",
+          "inline-flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium transition",
           open
             ? "bg-zinc-100 text-zinc-900"
             : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
@@ -104,7 +104,7 @@ export function ActiveSellersNav({
                 role="menuitem"
                 onClick={() => setOpenPath(null)}
                 className={cn(
-                  "block truncate rounded-lg px-2.5 py-1.5 text-sm transition-colors",
+                  "block cursor-pointer truncate rounded-lg px-2.5 py-1.5 text-sm transition-colors",
                   isActive
                     ? "bg-zinc-900 text-white"
                     : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"

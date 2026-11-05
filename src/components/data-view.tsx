@@ -1,4 +1,9 @@
-import { useMemo, useState } from "react";
+import {
+  useMemo,
+  useState,
+  type ButtonHTMLAttributes,
+  type ReactNode,
+} from "react";
 import { Database, Download, Trash2 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { refreshMorosidad } from "@/lib/morosidad";
@@ -13,7 +18,38 @@ import {
 import { usePanel } from "@/src/panel";
 import { CxcTable } from "./cxc-table";
 import { ClientCardsMobile } from "./client-cards-mobile";
-import { Button } from "./ui";
+import { Button, cn } from "./ui";
+
+function IconActionButton({
+  label,
+  variant = "primary",
+  className,
+  children,
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement> & {
+  label: string;
+  variant?: "primary" | "danger" | "success";
+  children: ReactNode;
+}) {
+  return (
+    <span className="group relative inline-flex">
+      <Button
+        {...props}
+        variant={variant}
+        aria-label={label}
+        className={cn("h-9 w-9 px-0 py-0", className)}
+      >
+        {children}
+      </Button>
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute right-0 top-full z-20 mt-2 hidden whitespace-nowrap rounded-md bg-zinc-900 px-2 py-1 text-[11px] font-medium text-white shadow-lg group-hover:block group-focus-within:block"
+      >
+        {label}
+      </span>
+    </span>
+  );
+}
 
 type ClientGroup = {
   client: string;
@@ -255,45 +291,43 @@ export function DataView({ canManage }: { canManage: boolean }) {
         <div className="flex flex-wrap items-center gap-2">
           {canManage && (
             <>
-              <Button
+              <IconActionButton
+                label={
+                  saveUploadMutation.isPending
+                    ? "Guardando..."
+                    : uploadId
+                      ? "Ya guardado"
+                      : "Guardar"
+                }
                 onClick={saveToDb}
                 disabled={saveUploadMutation.isPending || uploadId !== null}
-                title={
-                  uploadId
-                    ? "Esta carga ya esta guardada en la base de datos"
-                    : undefined
-                }
               >
                 <Database className="h-4 w-4" />
-                {saveUploadMutation.isPending
-                  ? "GUARDANDO..."
-                  : uploadId
-                    ? "YA GUARDADO"
-                    : "GUARDAR"}
-              </Button>
-              <Button
+              </IconActionButton>
+              <IconActionButton
                 variant="danger"
+                label={
+                  deleteUploadMutation.isPending ? "Eliminando..." : "Eliminar"
+                }
                 onClick={handleDeleteAll}
                 disabled={deleteUploadMutation.isPending}
               >
                 <Trash2 className="h-4 w-4" />
-                {deleteUploadMutation.isPending ? "ELIMINANDO..." : "ELIMINAR"}
-              </Button>
+              </IconActionButton>
             </>
           )}
-          <Button
+          <IconActionButton
             variant="success"
+            label={
+              uploadId
+                ? "Descargar data"
+                : "Guarda la data para descargar"
+            }
             onClick={downloadData}
             disabled={uploadId === null}
-            title={
-              uploadId
-                ? undefined
-                : "La descarga se habilita al guardar la data en la base de datos"
-            }
           >
             <Download className="h-4 w-4" />
-            DESCARGAR DATA
-          </Button>
+          </IconActionButton>
         </div>
       </div>
 
@@ -333,7 +367,7 @@ export function DataView({ canManage }: { canManage: boolean }) {
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setSelectedVendedor(null)}
-            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+            className={`cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-colors ${
               !selectedVendedor
                 ? "bg-zinc-900 text-white"
                 : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
@@ -345,7 +379,7 @@ export function DataView({ canManage }: { canManage: boolean }) {
             <button
               key={seller.name}
               onClick={() => setSelectedVendedor(seller.name)}
-              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+              className={`cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                 selectedVendedor === seller.name
                   ? "bg-zinc-900 text-white"
                   : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
@@ -363,7 +397,7 @@ export function DataView({ canManage }: { canManage: boolean }) {
           <select
             value={selectedUnidad ?? ""}
             onChange={(event) => setSelectedUnidad(event.target.value || null)}
-            className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-700 shadow-sm transition-colors focus:border-emerald-500 focus:outline-none"
+            className="cursor-pointer rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-700 shadow-sm transition-colors focus:border-emerald-500 focus:outline-none"
           >
             <option value="">Todas</option>
             {unidades.map((unidad) => (

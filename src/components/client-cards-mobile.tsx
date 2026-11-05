@@ -29,7 +29,7 @@ function ClientCard({
         type="button"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
-        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
+        className="flex w-full cursor-pointer items-center justify-between gap-3 px-4 py-3 text-left"
       >
         <span className="flex min-w-0 items-center gap-3">
           <span className="shrink-0 text-xs font-semibold text-zinc-400">
@@ -113,7 +113,7 @@ function ClientCard({
                 );
                 openWhatsApp(message);
               }}
-              className="flex w-full items-center justify-center gap-2 rounded-b-xl bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700"
+              className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-b-xl bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700"
             >
               Compartir
               <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">

@@ -361,7 +361,7 @@ export function AdminUsersPage({ currentUserId }: { currentUserId: string }) {
                                 },
                               })
                             }
-                            className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-xs text-zinc-700"
+                            className="cursor-pointer rounded-md border border-zinc-300 bg-white px-2 py-1 text-xs text-zinc-700 disabled:cursor-not-allowed"
                           >
                             <option value="user">Usuario</option>
                             <option value="admin">Administrador</option>

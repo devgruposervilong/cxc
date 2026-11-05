@@ -23,7 +23,7 @@ export function WhatsAppShareButton({
         const message = buildWhatsAppMessage(client, docs, subtotal);
         openWhatsApp(message);
       }}
-      className="rounded p-1 text-emerald-600 transition hover:bg-emerald-50"
+      className="cursor-pointer rounded p-1 text-emerald-600 transition hover:bg-emerald-50"
       aria-label="Compartir por WhatsApp"
       title="Compartir por WhatsApp"
     >
