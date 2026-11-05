@@ -109,10 +109,12 @@ export function CxcTable({
     return defs;
   }, [onDelete, showActions, showSeller]);
 
+  const tableState = useMemo(() => ({ grouping: ["client"] }), []);
+
   const table = useReactTable({
     data: rows,
     columns,
-    state: { grouping: ["client"] },
+    state: tableState,
     getCoreRowModel: getCoreRowModel(),
     getGroupedRowModel: getGroupedRowModel(),
   });
