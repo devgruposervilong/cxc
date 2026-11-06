@@ -10,6 +10,7 @@ import { refreshMorosidad } from "@/lib/morosidad";
 import { rankRows } from "@/lib/ranking";
 import { formatCurrency } from "@/lib/format";
 import type { DataRow, DocumentType } from "@/lib/types";
+import type { Me } from "@/src/lib/api";
 import {
   useDeleteDocument,
   useDeleteUpload,
@@ -18,36 +19,29 @@ import {
 import { usePanel } from "@/src/panel";
 import { CxcTable } from "./cxc-table";
 import { ClientCardsMobile } from "./client-cards-mobile";
-import { Button, cn } from "./ui";
+import { HeaderActionsPortal } from "./header-actions";
+import { Button, Tooltip, cn } from "./ui";
 
 function IconActionButton({
   label,
-  variant = "primary",
   className,
   children,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
   label: string;
-  variant?: "primary" | "danger" | "success";
   children: ReactNode;
 }) {
   return (
-    <span className="group relative inline-flex">
+    <Tooltip label={label}>
       <Button
         {...props}
-        variant={variant}
+        variant="ghost"
         aria-label={label}
         className={cn("h-9 w-9 px-0 py-0", className)}
       >
         {children}
       </Button>
-      <span
-        role="tooltip"
-        className="pointer-events-none absolute right-0 top-full z-20 mt-2 hidden whitespace-nowrap rounded-md bg-zinc-900 px-2 py-1 text-[11px] font-medium text-white shadow-lg group-hover:block group-focus-within:block"
-      >
-        {label}
-      </span>
-    </span>
+    </Tooltip>
   );
 }
 
@@ -58,7 +52,13 @@ type ClientGroup = {
   docs: DataRow[];
 };
 
-export function DataView({ canManage }: { canManage: boolean }) {
+export function DataView({
+  canManage,
+  user,
+}: {
+  canManage: boolean;
+  user: Me["user"];
+}) {
   const {
     filas,
     nombreArchivo,
@@ -69,6 +69,13 @@ export function DataView({ canManage }: { canManage: boolean }) {
     uploadId,
     setUploadId,
   } = usePanel();
+
+  const roleLabel =
+    user.role === "admin"
+      ? "Admin"
+      : user.role === "seller"
+        ? "Vendedor"
+        : "Usuario";
 
   const [selectedVendedor, setSelectedVendedor] = useState<string | null>(null);
   const [selectedUnidad, setSelectedUnidad] = useState<string | null>(null);
@@ -278,56 +285,61 @@ export function DataView({ canManage }: { canManage: boolean }) {
 
   return (
     <div className="flex h-full flex-col gap-4">
+      <HeaderActionsPortal>
+        {canManage && (
+          <>
+            <IconActionButton
+              label={
+                saveUploadMutation.isPending
+                  ? "Guardando..."
+                  : uploadId
+                    ? "Ya guardado"
+                    : "Guardar"
+              }
+              onClick={saveToDb}
+              disabled={saveUploadMutation.isPending || uploadId !== null}
+            >
+              <Database className="h-4 w-4 text-zinc-600" />
+            </IconActionButton>
+            <IconActionButton
+              label={
+                deleteUploadMutation.isPending ? "Eliminando..." : "Eliminar"
+              }
+              onClick={handleDeleteAll}
+              disabled={deleteUploadMutation.isPending}
+              className="hover:bg-red-50"
+            >
+              <Trash2 className="h-4 w-4 text-red-600" />
+            </IconActionButton>
+          </>
+        )}
+        <IconActionButton
+          label={uploadId ? "Descargar data" : "Guarda la data para descargar"}
+          onClick={downloadData}
+          disabled={uploadId === null}
+          className="hover:bg-emerald-50"
+        >
+          <Download className="h-4 w-4 text-emerald-600" />
+        </IconActionButton>
+      </HeaderActionsPortal>
+
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
         <span className="min-w-0 text-sm text-zinc-500">
           Actualizado: {cargadoEn}
           {saveStatus && (
-            <span className={saveStatus.ok ? "text-emerald-600" : "text-red-600"}>
+            <span
+              className={saveStatus.ok ? "text-emerald-600" : "text-red-600"}
+            >
               {" "}
               · {saveStatus.text}
             </span>
           )}
         </span>
-        <div className="flex flex-wrap items-center gap-2">
-          {canManage && (
-            <>
-              <IconActionButton
-                label={
-                  saveUploadMutation.isPending
-                    ? "Guardando..."
-                    : uploadId
-                      ? "Ya guardado"
-                      : "Guardar"
-                }
-                onClick={saveToDb}
-                disabled={saveUploadMutation.isPending || uploadId !== null}
-              >
-                <Database className="h-4 w-4" />
-              </IconActionButton>
-              <IconActionButton
-                variant="danger"
-                label={
-                  deleteUploadMutation.isPending ? "Eliminando..." : "Eliminar"
-                }
-                onClick={handleDeleteAll}
-                disabled={deleteUploadMutation.isPending}
-              >
-                <Trash2 className="h-4 w-4" />
-              </IconActionButton>
-            </>
-          )}
-          <IconActionButton
-            variant="success"
-            label={
-              uploadId
-                ? "Descargar data"
-                : "Guarda la data para descargar"
-            }
-            onClick={downloadData}
-            disabled={uploadId === null}
-          >
-            <Download className="h-4 w-4" />
-          </IconActionButton>
+        <div className="text-right leading-tight">
+          <p className="max-w-[160px] truncate text-xs font-medium text-zinc-800">
+            {user.name}
+          </p>
+          <p className="text-[11px] text-zinc-500">{roleLabel}</p>
         </div>
       </div>
 

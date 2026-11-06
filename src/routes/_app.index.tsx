@@ -17,5 +17,7 @@ export const Route = createFileRoute("/_app/")({
 
 function IndexPage() {
   const { me } = useRouteContext({ from: "/_app" });
-  return <DashboardPage canManage={me.user.role === "admin"} />;
+  return (
+    <DashboardPage canManage={me.user.role === "admin"} user={me.user} />
+  );
 }

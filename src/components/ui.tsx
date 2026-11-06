@@ -54,6 +54,34 @@ export function Button({
   );
 }
 
+export const iconButtonClass =
+  "inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-md transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
+
+export function Tooltip({
+  label,
+  align = "right",
+  children,
+}: {
+  label: string;
+  align?: "left" | "right";
+  children: ReactNode;
+}) {
+  return (
+    <span className="group relative inline-flex">
+      {children}
+      <span
+        role="tooltip"
+        className={cn(
+          "pointer-events-none absolute top-full z-50 mt-2 hidden whitespace-nowrap rounded-md border border-zinc-200 bg-white px-2.5 py-1.5 text-[11px] font-medium text-zinc-700 shadow-md group-hover:block group-focus-within:block",
+          align === "right" ? "right-0" : "left-0"
+        )}
+      >
+        {label}
+      </span>
+    </span>
+  );
+}
+
 export function TextField({
   label,
   error,

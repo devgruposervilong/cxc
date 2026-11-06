@@ -1,19 +1,32 @@
 import { useLatestUpload } from "@/src/hooks/use-uploads";
 import { PanelProvider, usePanel } from "@/src/panel";
+import type { Me } from "@/src/lib/api";
 import { DataView } from "./data-view";
 import { FileUpload } from "./file-upload";
 import { Alert, Button } from "./ui";
 
-function PanelContent({ canManage }: { canManage: boolean }) {
+function PanelContent({
+  canManage,
+  user,
+}: {
+  canManage: boolean;
+  user: Me["user"];
+}) {
   const { filas } = usePanel();
   return filas.length > 0 ? (
-    <DataView canManage={canManage} />
+    <DataView canManage={canManage} user={user} />
   ) : (
     <FileUpload />
   );
 }
 
-export function DashboardPage({ canManage }: { canManage: boolean }) {
+export function DashboardPage({
+  canManage,
+  user,
+}: {
+  canManage: boolean;
+  user: Me["user"];
+}) {
   const { data, isPending, isError, error, refetch } = useLatestUpload();
 
   if (isPending) {
@@ -41,7 +54,7 @@ export function DashboardPage({ canManage }: { canManage: boolean }) {
 
   return (
     <PanelProvider initialUpload={data ?? null}>
-      <PanelContent canManage={canManage} />
+      <PanelContent canManage={canManage} user={user} />
     </PanelProvider>
   );
 }
