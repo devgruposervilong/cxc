@@ -57,6 +57,9 @@ export function Button({
 export const iconButtonClass =
   "inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-md transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
 
+export const menuItemClass =
+  "flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-900 disabled:cursor-not-allowed disabled:opacity-50";
+
 export function Tooltip({
   label,
   align = "right",

@@ -20,7 +20,8 @@ import { usePanel } from "@/src/panel";
 import { CxcTable } from "./cxc-table";
 import { ClientCardsMobile } from "./client-cards-mobile";
 import { HeaderActionsPortal } from "./header-actions";
-import { Button, Tooltip, cn } from "./ui";
+import { SellerFilterDropdown } from "./seller-filter-dropdown";
+import { Button, Tooltip, cn, menuItemClass } from "./ui";
 
 function IconActionButton({
   label,
@@ -42,6 +43,28 @@ function IconActionButton({
         {children}
       </Button>
     </Tooltip>
+  );
+}
+
+function MenuActionButton({
+  label,
+  className,
+  children,
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement> & {
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      {...props}
+      type="button"
+      role="menuitem"
+      className={cn(menuItemClass, className)}
+    >
+      {children}
+      <span className="truncate">{label}</span>
+    </button>
   );
 }
 
@@ -78,7 +101,6 @@ export function DataView({
         : "Usuario";
 
   const [selectedVendedor, setSelectedVendedor] = useState<string | null>(null);
-  const [selectedUnidad, setSelectedUnidad] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<{
     text: string;
     ok: boolean;
@@ -87,22 +109,12 @@ export function DataView({
   const deleteUploadMutation = useDeleteUpload();
   const deleteDocumentMutation = useDeleteDocument();
 
-  const unidades = useMemo(() => {
-    const set = new Set<string>();
-    for (const fila of filas) {
-      if (fila.businessUnit) set.add(fila.businessUnit);
-    }
-    return Array.from(set).sort();
-  }, [filas]);
-
   const filteredRows = useMemo(() => {
-    let rows = filas;
-    if (selectedUnidad) {
-      rows = rows.filter((fila) => fila.businessUnit === selectedUnidad);
-    }
-    if (!selectedVendedor) return rows;
-    return rows.filter((fila) => fila.seller === selectedVendedor);
-  }, [filas, selectedVendedor, selectedUnidad]);
+    if (!selectedVendedor) return filas;
+    return filas.filter(
+      (fila) => (fila.seller ?? "SIN VENDEDOR") === selectedVendedor
+    );
+  }, [filas, selectedVendedor]);
 
   const totalInvoices = filteredRows.filter((fila) => fila.type === "FACT").length;
   const totalCreditNotes = filteredRows.filter(
@@ -283,28 +295,33 @@ export function DataView({
     }
   }
 
+  const saveLabel = saveUploadMutation.isPending
+    ? "Guardando..."
+    : uploadId
+      ? "Ya guardado"
+      : "Guardar";
+  const deleteLabel = deleteUploadMutation.isPending
+    ? "Eliminando..."
+    : "Eliminar";
+  const downloadLabel = uploadId
+    ? "Descargar data"
+    : "Guarda la data para descargar";
+  const saveDisabled = saveUploadMutation.isPending || uploadId !== null;
+
   return (
     <div className="flex h-full flex-col gap-4">
-      <HeaderActionsPortal>
+      <HeaderActionsPortal target="desktop">
         {canManage && (
           <>
             <IconActionButton
-              label={
-                saveUploadMutation.isPending
-                  ? "Guardando..."
-                  : uploadId
-                    ? "Ya guardado"
-                    : "Guardar"
-              }
+              label={saveLabel}
               onClick={saveToDb}
-              disabled={saveUploadMutation.isPending || uploadId !== null}
+              disabled={saveDisabled}
             >
               <Database className="h-4 w-4 text-zinc-600" />
             </IconActionButton>
             <IconActionButton
-              label={
-                deleteUploadMutation.isPending ? "Eliminando..." : "Eliminar"
-              }
+              label={deleteLabel}
               onClick={handleDeleteAll}
               disabled={deleteUploadMutation.isPending}
               className="hover:bg-red-50"
@@ -314,13 +331,43 @@ export function DataView({
           </>
         )}
         <IconActionButton
-          label={uploadId ? "Descargar data" : "Guarda la data para descargar"}
+          label={downloadLabel}
           onClick={downloadData}
           disabled={uploadId === null}
           className="hover:bg-emerald-50"
         >
           <Download className="h-4 w-4 text-emerald-600" />
         </IconActionButton>
+      </HeaderActionsPortal>
+
+      <HeaderActionsPortal target="menu">
+        {canManage && (
+          <>
+            <MenuActionButton
+              label={saveLabel}
+              onClick={saveToDb}
+              disabled={saveDisabled}
+            >
+              <Database className="h-4 w-4 shrink-0 text-zinc-600" />
+            </MenuActionButton>
+            <MenuActionButton
+              label={deleteLabel}
+              onClick={handleDeleteAll}
+              disabled={deleteUploadMutation.isPending}
+              className="hover:bg-red-50"
+            >
+              <Trash2 className="h-4 w-4 shrink-0 text-red-600" />
+            </MenuActionButton>
+          </>
+        )}
+        <MenuActionButton
+          label={downloadLabel}
+          onClick={downloadData}
+          disabled={uploadId === null}
+          className="hover:bg-emerald-50"
+        >
+          <Download className="h-4 w-4 shrink-0 text-emerald-600" />
+        </MenuActionButton>
       </HeaderActionsPortal>
 
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
@@ -375,50 +422,12 @@ export function DataView({
         </div>
       </div>
 
-      <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-          <button
-            onClick={() => setSelectedVendedor(null)}
-            className={`cursor-pointer rounded-full px-2.5 py-1.5 text-xs font-medium transition-colors sm:px-3 sm:py-1 ${
-              !selectedVendedor
-                ? "bg-zinc-900 text-white"
-                : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
-            }`}
-          >
-            Todos
-          </button>
-          {sellers.map((seller) => (
-            <button
-              key={seller.name}
-              onClick={() => setSelectedVendedor(seller.name)}
-              className={`cursor-pointer rounded-full px-2.5 py-1.5 text-xs font-medium transition-colors sm:px-3 sm:py-1 ${
-                selectedVendedor === seller.name
-                  ? "bg-zinc-900 text-white"
-                  : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
-              }`}
-              title={`Facturas: ${seller.invoices} | N/C: ${seller.creditNotes} | CxC: ${formatCurrency(seller.receivables)}`}
-            >
-              {seller.name} · {seller.percentage.toFixed(1)}%
-            </button>
-          ))}
-        </div>
-        <label className="flex w-full shrink-0 items-center justify-between gap-2 sm:w-auto sm:justify-start">
-          <span className="text-xs font-medium uppercase tracking-wide text-zinc-500">
-            Unidad de negocio
-          </span>
-          <select
-            value={selectedUnidad ?? ""}
-            onChange={(event) => setSelectedUnidad(event.target.value || null)}
-            className="min-w-0 flex-1 cursor-pointer rounded-md border border-zinc-300 bg-white px-3 py-2 text-base text-zinc-700 shadow-sm transition-colors focus:border-emerald-500 focus:outline-none sm:flex-none lg:text-sm"
-          >
-            <option value="">Todas</option>
-            {unidades.map((unidad) => (
-              <option key={unidad} value={unidad}>
-                {unidad}
-              </option>
-            ))}
-          </select>
-        </label>
+      <div className="flex shrink-0 items-center">
+        <SellerFilterDropdown
+          sellers={sellers}
+          value={selectedVendedor}
+          onChange={setSelectedVendedor}
+        />
       </div>
 
       <div className="md:hidden">

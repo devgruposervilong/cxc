@@ -69,7 +69,7 @@ export function ActiveSellersNav({
         aria-expanded={open}
         title="Ver vendedores"
         className={cn(
-          "inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-md px-2 text-xs font-medium transition sm:px-3 sm:text-sm",
+          "inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-md px-3 text-sm font-medium transition",
           open
             ? "bg-zinc-100 text-zinc-900"
             : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
