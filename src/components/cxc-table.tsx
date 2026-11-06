@@ -157,7 +157,6 @@ export function CxcTable({
             (sum, subRow) => sum + (subRow.original.total ?? 0),
             0
           );
-          const rank = docs[0]?.original.rank ?? row.original.rank;
 
           return (
             <Fragment key={row.id}>
@@ -184,9 +183,6 @@ export function CxcTable({
                   colSpan={leadingCols}
                   className="px-4 py-2 text-right text-zinc-700"
                 >
-                  <span className="mr-2 text-xs font-semibold text-zinc-400">
-                    #{rank}
-                  </span>
                   Subtotal {String(row.groupingValue ?? "SIN CLIENTE")}
                 </td>
                 <td className="px-4 py-2 text-right font-bold text-zinc-900">
