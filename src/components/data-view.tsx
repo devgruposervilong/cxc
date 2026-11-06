@@ -345,7 +345,7 @@ export function DataView({
 
       <div className="grid shrink-0 grid-cols-2 gap-2 md:gap-4 lg:grid-cols-3">
         <div className="rounded-lg border border-zinc-200 bg-white p-3 shadow-sm md:p-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+          <p className="text-[10px] font-medium uppercase leading-tight tracking-normal text-zinc-500 sm:text-xs sm:tracking-wide">
             Total Facturas
           </p>
           <p className="mt-1 text-lg font-semibold text-zinc-900 md:text-2xl">
@@ -353,15 +353,15 @@ export function DataView({
           </p>
         </div>
         <div className="rounded-lg border border-zinc-200 bg-white p-3 shadow-sm md:p-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+          <p className="text-[10px] font-medium uppercase leading-tight tracking-normal text-zinc-500 sm:text-xs sm:tracking-wide">
             Total Notas de Credito
           </p>
           <p className="mt-1 text-lg font-semibold text-zinc-900 md:text-2xl">
             {totalCreditNotes}
           </p>
         </div>
-        <div className="rounded-lg border border-zinc-200 bg-white p-3 shadow-sm md:p-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+        <div className="col-span-2 rounded-lg border border-zinc-200 bg-white p-3 shadow-sm md:p-4 lg:col-span-1">
+          <p className="text-[10px] font-medium uppercase leading-tight tracking-normal text-zinc-500 sm:text-xs sm:tracking-wide">
             Total Cuentas x Cobrar
           </p>
           <p className="mt-1 text-lg font-semibold text-emerald-600 md:text-2xl">
@@ -376,10 +376,10 @@ export function DataView({
       </div>
 
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           <button
             onClick={() => setSelectedVendedor(null)}
-            className={`cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+            className={`cursor-pointer rounded-full px-2.5 py-1.5 text-xs font-medium transition-colors sm:px-3 sm:py-1 ${
               !selectedVendedor
                 ? "bg-zinc-900 text-white"
                 : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
@@ -391,7 +391,7 @@ export function DataView({
             <button
               key={seller.name}
               onClick={() => setSelectedVendedor(seller.name)}
-              className={`cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+              className={`cursor-pointer rounded-full px-2.5 py-1.5 text-xs font-medium transition-colors sm:px-3 sm:py-1 ${
                 selectedVendedor === seller.name
                   ? "bg-zinc-900 text-white"
                   : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
@@ -402,14 +402,14 @@ export function DataView({
             </button>
           ))}
         </div>
-        <label className="flex shrink-0 items-center gap-2">
+        <label className="flex w-full shrink-0 items-center justify-between gap-2 sm:w-auto sm:justify-start">
           <span className="text-xs font-medium uppercase tracking-wide text-zinc-500">
             Unidad de negocio
           </span>
           <select
             value={selectedUnidad ?? ""}
             onChange={(event) => setSelectedUnidad(event.target.value || null)}
-            className="cursor-pointer rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-700 shadow-sm transition-colors focus:border-emerald-500 focus:outline-none"
+            className="min-w-0 flex-1 cursor-pointer rounded-md border border-zinc-300 bg-white px-3 py-2 text-base text-zinc-700 shadow-sm transition-colors focus:border-emerald-500 focus:outline-none sm:flex-none lg:text-sm"
           >
             <option value="">Todas</option>
             {unidades.map((unidad) => (

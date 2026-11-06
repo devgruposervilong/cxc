@@ -69,13 +69,19 @@ export function FileUpload() {
       {loading ? (
         <p className="text-sm text-zinc-500">Procesando archivo...</p>
       ) : (
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex max-w-sm flex-col items-center gap-2 px-6">
           <Upload className="h-8 w-8 text-zinc-400" />
           <span className="text-sm font-medium text-zinc-800">
             {nombreArchivo || "Sube tu archivo Excel"}
           </span>
           <span className="text-sm text-zinc-500">
-            Arrastra tu archivo .xls o .xlsx aqui o haz clic para seleccionar
+            <span className="hidden md:inline">
+              Arrastra tu archivo .xls o .xlsx aqui o haz clic para
+              seleccionar
+            </span>
+            <span className="md:hidden">
+              Toca para seleccionar un archivo .xls o .xlsx
+            </span>
           </span>
         </div>
       )}

@@ -61,7 +61,7 @@ export function ActiveSellersNav({
   if (sellers.length === 0) return null;
 
   return (
-    <nav ref={containerRef} className="relative flex items-center">
+    <nav ref={containerRef} className="flex items-center md:relative">
       <button
         type="button"
         onClick={() => setOpenPath(open ? null : pathname)}
@@ -69,7 +69,7 @@ export function ActiveSellersNav({
         aria-expanded={open}
         title="Ver vendedores"
         className={cn(
-          "inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-md px-3 text-sm font-medium transition",
+          "inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-md px-2 text-xs font-medium transition sm:px-3 sm:text-sm",
           open
             ? "bg-zinc-100 text-zinc-900"
             : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
@@ -104,7 +104,7 @@ export function ActiveSellersNav({
                 role="menuitem"
                 onClick={() => setOpenPath(null)}
                 className={cn(
-                  "block cursor-pointer truncate rounded-lg px-2.5 py-1.5 text-sm transition-colors",
+                  "block cursor-pointer truncate rounded-lg px-2.5 py-2 text-sm transition-colors sm:py-1.5",
                   isActive
                     ? "bg-zinc-900 text-white"
                     : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"

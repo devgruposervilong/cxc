@@ -26,7 +26,7 @@ export function DashboardShell({
     <HeaderActionsProvider>
       <div className="flex min-h-screen justify-center bg-zinc-50 md:h-screen md:overflow-hidden">
         <div className="flex w-full flex-col md:w-[80%]">
-          <header className="relative z-40 shrink-0 border-b border-zinc-200 bg-white/80 px-4 py-3 backdrop-blur md:px-6 md:py-4">
+          <header className="relative z-40 shrink-0 border-b border-zinc-200 bg-white/80 px-3 py-3 backdrop-blur sm:px-4 md:px-6 md:py-4">
             <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
               <Link
                 to="/"
@@ -49,7 +49,7 @@ export function DashboardShell({
                 </div>
               </Link>
 
-              <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+              <div className="relative ml-auto flex flex-wrap items-center justify-end gap-1.5 sm:gap-2">
                 <ActiveSellersNav
                   sellers={sellers}
                   pathname={pathname}
@@ -91,7 +91,7 @@ export function DashboardShell({
             </div>
           </header>
 
-          <div className="flex flex-col p-2 md:min-h-0 md:flex-1 md:overflow-hidden md:p-6">
+          <div className="flex flex-col p-3 sm:p-4 md:min-h-0 md:flex-1 md:overflow-hidden md:p-6">
             {children}
           </div>
         </div>

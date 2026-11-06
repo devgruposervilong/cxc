@@ -50,7 +50,9 @@ export function SellerStatement({
     <div className="flex h-full flex-col gap-4">
       <div className="flex shrink-0 flex-wrap items-end justify-between gap-2">
         <div className="min-w-0">
-          <h2 className="text-lg font-semibold text-zinc-900">{fullName}</h2>
+          <h2 className="break-words text-lg font-semibold text-zinc-900">
+            {fullName}
+          </h2>
           <p className="text-sm text-zinc-500">
             {zone ? `${zone} · ` : ""}
             {loadedAt ? `Actualizado: ${loadedAt}` : "Sin carga de datos activa"}
@@ -60,7 +62,7 @@ export function SellerStatement({
 
       <div className="grid shrink-0 grid-cols-2 gap-2 md:gap-4 lg:grid-cols-4">
         <div className="rounded-lg border border-zinc-200 bg-white p-3 shadow-sm md:p-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+          <p className="text-[10px] font-medium uppercase leading-tight tracking-normal text-zinc-500 sm:text-xs sm:tracking-wide">
             Facturas
           </p>
           <p className="mt-1 text-lg font-semibold text-zinc-900 md:text-2xl">
@@ -68,7 +70,7 @@ export function SellerStatement({
           </p>
         </div>
         <div className="rounded-lg border border-zinc-200 bg-white p-3 shadow-sm md:p-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+          <p className="text-[10px] font-medium uppercase leading-tight tracking-normal text-zinc-500 sm:text-xs sm:tracking-wide">
             Notas de Credito
           </p>
           <p className="mt-1 text-lg font-semibold text-zinc-900 md:text-2xl">
@@ -76,7 +78,7 @@ export function SellerStatement({
           </p>
         </div>
         <div className="rounded-lg border border-zinc-200 bg-white p-3 shadow-sm md:p-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+          <p className="text-[10px] font-medium uppercase leading-tight tracking-normal text-zinc-500 sm:text-xs sm:tracking-wide">
             Facturas Vencidas (+15 dias)
           </p>
           <p
@@ -88,7 +90,7 @@ export function SellerStatement({
           </p>
         </div>
         <div className="rounded-lg border border-zinc-200 bg-white p-3 shadow-sm md:p-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+          <p className="text-[10px] font-medium uppercase leading-tight tracking-normal text-zinc-500 sm:text-xs sm:tracking-wide">
             Total Cuentas x Cobrar
           </p>
           <p className="mt-1 text-lg font-semibold text-emerald-600 md:text-2xl">

@@ -53,7 +53,7 @@ function LoginPage() {
   return (
     <AuthLayout
       title="Iniciar sesion"
-                subtitle="Acceso restringido. Las cuentas se crean por invitacion."
+      subtitle="Acceso restringido. Las cuentas se crean por invitacion."
     >
       <form
         className="flex flex-col gap-4"
