@@ -20,9 +20,15 @@ import {
 import { usePanel } from "@/src/panel";
 import { CxcTable } from "./cxc-table";
 import { ClientCardsMobile } from "./client-cards-mobile";
+import {
+  BusinessUnitFilterDropdown,
+  type BusinessUnitFilterOption,
+} from "./business-unit-filter-dropdown";
 import { HeaderActionsPortal } from "./header-actions";
 import { SellerFilterDropdown } from "./seller-filter-dropdown";
 import { Button, Tooltip, cn, menuItemClass } from "./ui";
+
+const NO_BUSINESS_UNIT = "__sin_unidad__";
 
 function IconActionButton({
   label,
@@ -102,6 +108,9 @@ export function DataView({
         : "Usuario";
 
   const [selectedVendedor, setSelectedVendedor] = useState<string | null>(null);
+  const [selectedBusinessUnit, setSelectedBusinessUnit] = useState<string | null>(
+    null
+  );
   const [saveStatus, setSaveStatus] = useState<{
     text: string;
     ok: boolean;
@@ -112,11 +121,47 @@ export function DataView({
   const updateDocumentMutation = useUpdateDocument();
 
   const filteredRows = useMemo(() => {
-    if (!selectedVendedor) return filas;
-    return filas.filter(
-      (fila) => (fila.seller ?? "SIN VENDEDOR") === selectedVendedor
-    );
-  }, [filas, selectedVendedor]);
+    return filas.filter((fila) => {
+      if (
+        selectedVendedor &&
+        (fila.seller ?? "SIN VENDEDOR") !== selectedVendedor
+      ) {
+        return false;
+      }
+
+      if (selectedBusinessUnit !== null) {
+        const unit = fila.businessUnit?.trim();
+        const key = unit || NO_BUSINESS_UNIT;
+        if (key !== selectedBusinessUnit) return false;
+      }
+
+      return true;
+    });
+  }, [filas, selectedBusinessUnit, selectedVendedor]);
+
+  const businessUnitOptions = useMemo<BusinessUnitFilterOption[]>(() => {
+    const units = new Set<string>();
+    let hasRowsWithoutUnit = false;
+
+    for (const fila of filas) {
+      const unit = fila.businessUnit?.trim();
+      if (unit) units.add(unit);
+      else hasRowsWithoutUnit = true;
+    }
+
+    const options = Array.from(units)
+      .sort((a, b) => a.localeCompare(b, "es"))
+      .map((unit) => ({ value: unit, label: unit }));
+
+    if (hasRowsWithoutUnit) {
+      options.push({
+        value: NO_BUSINESS_UNIT,
+        label: "Sin unidad de negocio",
+      });
+    }
+
+    return options;
+  }, [filas]);
 
   const totalInvoices = filteredRows.filter((fila) => fila.type === "FACT").length;
   const totalCreditNotes = filteredRows.filter(
@@ -171,6 +216,8 @@ export function DataView({
     setNombreArchivo("");
     setCargadoEn(null);
     setUploadId(null);
+    setSelectedVendedor(null);
+    setSelectedBusinessUnit(null);
   }
 
   async function updateDocument(original: DataRow, changes: DocumentChanges) {
@@ -460,11 +507,16 @@ export function DataView({
         </div>
       </div>
 
-      <div className="flex shrink-0 items-center">
+      <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <SellerFilterDropdown
           sellers={sellers}
           value={selectedVendedor}
           onChange={setSelectedVendedor}
+        />
+        <BusinessUnitFilterDropdown
+          options={businessUnitOptions}
+          value={selectedBusinessUnit}
+          onChange={setSelectedBusinessUnit}
         />
       </div>
 
