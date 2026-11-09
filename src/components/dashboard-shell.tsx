@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { LogOut, Users } from "lucide-react";
+import { Building2, LogOut, Users } from "lucide-react";
 import type { Seller } from "@/lib/types";
 import { useSignOut } from "@/src/hooks/use-auth";
 import { useSellers } from "@/src/hooks/use-sellers";
@@ -27,6 +27,7 @@ export function DashboardShell({
 }) {
   const { pathname } = useLocation();
   const isSeller = me.user.role === "seller";
+  const canViewClients = !isSeller;
 
   const signOut = useSignOut();
   const sellersQuery = useSellers(!isSeller);
@@ -70,6 +71,23 @@ export function DashboardShell({
                 <div className="hidden items-center gap-1 md:flex lg:gap-1.5">
                   <HeaderActionsSlot target="desktop" />
 
+                  {canViewClients && (
+                    <Tooltip label="Clientes">
+                      <Link
+                        to="/clientes"
+                        aria-label="Clientes"
+                        className={cn(
+                          iconButtonClass,
+                          pathname === "/clientes"
+                            ? "bg-zinc-900 text-white hover:bg-zinc-900 hover:text-white"
+                            : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+                        )}
+                      >
+                        <Building2 className="h-4 w-4" />
+                      </Link>
+                    </Tooltip>
+                  )}
+
                   {me.user.role === "admin" && (
                     <Tooltip label="Usuarios">
                       <Link
@@ -101,6 +119,23 @@ export function DashboardShell({
                 </div>
 
                 <HeaderActionsMenu>
+                  {canViewClients && (
+                    <Link
+                      to="/clientes"
+                      role="menuitem"
+                      aria-current={
+                        pathname === "/clientes" ? "page" : undefined
+                      }
+                      className={cn(
+                        menuItemClass,
+                        pathname === "/clientes" && "bg-zinc-100 text-zinc-900"
+                      )}
+                    >
+                      <Building2 className="h-4 w-4 shrink-0" />
+                      Clientes
+                    </Link>
+                  )}
+
                   {me.user.role === "admin" && (
                     <Link
                       to="/admin/usuarios"

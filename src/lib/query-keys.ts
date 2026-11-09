@@ -10,6 +10,9 @@ export const queryKeys = {
     list: ["sellers"] as const,
     portal: (keyUrl: string) => ["sellers", "portal", keyUrl] as const,
   },
+  clients: {
+    list: ["clients"] as const,
+  },
   invites: {
     detail: (token: string) => ["invite", token] as const,
   },

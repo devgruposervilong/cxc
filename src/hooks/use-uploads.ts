@@ -32,6 +32,8 @@ export function useSaveUpload() {
     },
     onSuccess: ({ latest }) => {
       queryClient.setQueryData(queryKeys.uploads.latest, latest);
+      // Guardar una carga puede crear clientes nuevos en el maestro.
+      void queryClient.invalidateQueries({ queryKey: queryKeys.clients.list });
     },
   });
 }

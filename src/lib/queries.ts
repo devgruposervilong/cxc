@@ -1,9 +1,11 @@
 import { queryOptions } from "@tanstack/react-query";
 import {
+  getClients,
   getLatestUpload,
   getSellerPortal,
   getSellers,
   getSetupStatus,
+  type ClientsCatalog,
   type LoadedUpload,
   type SetupStatus,
 } from "./api";
@@ -22,6 +24,14 @@ export function sellersQueryOptions(enabled = true) {
     queryKey: queryKeys.sellers.list,
     queryFn: getSellers,
     enabled,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function clientsQueryOptions() {
+  return queryOptions<ClientsCatalog>({
+    queryKey: queryKeys.clients.list,
+    queryFn: getClients,
     staleTime: 5 * 60 * 1000,
   });
 }

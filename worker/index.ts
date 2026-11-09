@@ -5,6 +5,7 @@ import { createDb } from "./db/client";
 import type { AppEnv } from "./types";
 import accountRoutes from "./routes/account";
 import adminRoutes from "./routes/admin";
+import clientRoutes from "./routes/clients";
 import sellerRoutes from "./routes/sellers";
 import uploadRoutes from "./routes/uploads";
 
@@ -29,6 +30,7 @@ app.all("/api/auth/*", (c) => c.get("auth").handler(c.req.raw));
 app.route("/api", accountRoutes);
 app.route("/api/uploads", uploadRoutes);
 app.route("/api/sellers", sellerRoutes);
+app.route("/api/clients", clientRoutes);
 app.route("/api/admin", adminRoutes);
 
 app.get("/api/health", (c) => c.json({ ok: true }));

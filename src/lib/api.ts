@@ -1,4 +1,9 @@
-import type { DataRow, DocumentType, Seller } from "@/lib/types";
+import type {
+  Client,
+  DataRow,
+  DocumentType,
+  Seller,
+} from "@/lib/types";
 
 export class ApiError extends Error {
   constructor(
@@ -120,6 +125,11 @@ export type AdminUser = {
 export type AdminUsersResponse = {
   users: AdminUser[];
   sellers: AdminSeller[];
+};
+
+export type ClientsCatalog = {
+  clients: Client[];
+  businessUnits: string[];
 };
 
 export type AdminInvite = {
@@ -264,6 +274,10 @@ export function adminDeleteInvite(id: string) {
   return apiFetch<{ deleted: boolean }>(`/api/admin/invites/${id}`, {
     method: "DELETE",
   });
+}
+
+export function getClients() {
+  return apiFetch<ClientsCatalog>("/api/clients");
 }
 
 export function adminRegenerateInvite(id: string) {
