@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-table";
 import { Check, Loader2, Pencil, Trash2, X } from "lucide-react";
 import type { DataRow, DocumentChanges, DocumentType } from "@/lib/types";
-import { formatCurrency } from "@/lib/format";
+import { formatAmountForInput, formatCurrency, parseAmountInput } from "@/lib/format";
 import { WhatsAppShareButton } from "./whatsapp-share-button";
 import { cn } from "./ui";
 
@@ -76,21 +76,14 @@ function toDraft(row: DataRow): DocumentDraft {
     number: row.number,
     emission: row.emission ?? "",
     expiration: row.expiration ?? "",
-    total: row.total === null ? "" : String(row.total),
+    total: formatAmountForInput(row.total),
     seller: row.seller ?? "",
   };
 }
 
-function parseTotal(value: string): number | null | undefined {
-  const trimmed = value.trim();
-  if (!trimmed) return null;
-  const parsed = Number(trimmed.replace(",", "."));
-  return Number.isFinite(parsed) ? parsed : undefined;
-}
-
 function toChanges(draft: DocumentDraft): DocumentChanges | null {
-  const total = parseTotal(draft.total);
-  if (total === undefined) return null;
+  const total = parseAmountInput(draft.total);
+  if (total.error) return null;
 
   return {
     client: draft.client.trim() || "SIN CLIENTE",
@@ -98,7 +91,7 @@ function toChanges(draft: DocumentDraft): DocumentChanges | null {
     number: draft.number.trim(),
     emission: draft.emission.trim() || null,
     expiration: draft.expiration.trim() || null,
-    total,
+    total: total.value,
     seller: draft.seller.trim() || null,
   };
 }
@@ -269,23 +262,43 @@ export function CxcTable({
     defs.push({
       accessorKey: "total",
       header: "TOTAL",
-      cell: ({ row }) =>
-        isEditing(row.original) ? (
-          <input
-            type="number"
-            step="0.01"
-            value={draft?.total ?? ""}
-            onChange={(event) =>
-              setDraft((current) =>
-                current ? { ...current, total: event.target.value } : current
-              )
-            }
-            aria-label="Total"
-            className={cn(inputClass, "min-w-[5rem] text-right")}
-          />
-        ) : (
-          formatCurrency(Number(row.original.total ?? 0))
-        ),
+      cell: ({ row }) => {
+        if (!isEditing(row.original)) {
+          return formatCurrency(Number(row.original.total ?? 0));
+        }
+
+        const amount = parseAmountInput(draft?.total ?? "");
+
+        return (
+          <div className="min-w-[7rem]">
+            <input
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
+              value={draft?.total ?? ""}
+              onChange={(event) =>
+                setDraft((current) =>
+                  current ? { ...current, total: event.target.value } : current
+                )
+              }
+              placeholder="0,00"
+              aria-label="Total"
+              aria-invalid={amount.error !== null}
+              className={cn(
+                inputClass,
+                "min-w-[5rem] text-right",
+                amount.error &&
+                  "border-red-400 focus:border-red-500 focus:ring-red-500"
+              )}
+            />
+            {amount.error && (
+              <p className="mt-1 text-left text-[10px] font-medium leading-tight text-red-600">
+                {amount.error}
+              </p>
+            )}
+          </div>
+        );
+      },
     });
 
     if (showActions) {
@@ -297,7 +310,7 @@ export function CxcTable({
             const saving = savingKey === rowKey(row.original);
             const canSave =
               Boolean(draft?.number.trim()) &&
-              parseTotal(draft?.total ?? "") !== undefined;
+              parseAmountInput(draft?.total ?? "").error === null;
 
             return (
               <div className="flex items-center gap-1">
