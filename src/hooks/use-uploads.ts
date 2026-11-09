@@ -5,7 +5,9 @@ import {
   deleteUpload,
   getLatestUpload,
   saveUpload,
+  updateDocumentFromUpload,
   type SaveUploadInput,
+  type UpdateDocumentInput,
 } from "@/src/lib/api";
 import { uploadQueryOptions } from "@/src/lib/queries";
 import { queryKeys } from "@/src/lib/query-keys";
@@ -45,6 +47,23 @@ export function useDeleteUpload() {
     mutationFn: deleteUpload,
     onSuccess: () => {
       queryClient.setQueryData(queryKeys.uploads.latest, null);
+      void queryClient.invalidateQueries({ queryKey: queryKeys.uploads.latest });
+    },
+  });
+}
+
+export function useUpdateDocument() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      uploadId,
+      input,
+    }: {
+      uploadId: string;
+      input: UpdateDocumentInput;
+    }) => updateDocumentFromUpload(uploadId, input),
+    onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.uploads.latest });
     },
   });

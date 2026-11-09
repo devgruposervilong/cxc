@@ -18,3 +18,15 @@ export type DataRow = {
   // se resuelve al leer (join por nombre contra Client) en load-upload.
   businessUnit?: string | null;
 };
+
+// Campos del documento que se pueden corregir desde la tabla. rank y
+// overdueDays no se editan: se recalculan a partir del resto de valores.
+export type DocumentChanges = {
+  client: string;
+  type: DocumentType;
+  number: string;
+  emission: string | null;
+  expiration: string | null;
+  total: number | null;
+  seller: string | null;
+};

@@ -1,6 +1,7 @@
 import {
   normalizeClientName,
   type DataRow,
+  type DocumentChanges,
   type DocumentType,
   type EnsureClientInput,
 } from "@/lib/types";
@@ -83,6 +84,22 @@ export async function persistUpload(
     await uploadRepository.deleteUpload(upload.id);
     throw error;
   }
+}
+
+export async function updateDocumentFromUpload(
+  db: Db,
+  uploadId: string,
+  originalType: DocumentType,
+  originalNumber: string,
+  changes: DocumentChanges
+): Promise<boolean> {
+  const documentRepository = new DrizzleDocumentRepository(db);
+  return documentRepository.updateDocument(
+    uploadId,
+    originalType,
+    originalNumber,
+    changes
+  );
 }
 
 export async function deleteDocumentFromUpload(

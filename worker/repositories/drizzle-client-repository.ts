@@ -1,4 +1,4 @@
-import { asc } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import {
   normalizeClientName,
   normalizeClientRif,
@@ -34,6 +34,30 @@ export class DrizzleClientRepository implements ClientRepository {
       seller: row.seller,
       businessUnit: row.businessUnit,
     }));
+  }
+
+  async updateClient(code: string, input: Client): Promise<Client | null> {
+    const [row] = await this.db
+      .update(client)
+      .set({
+        code: input.code,
+        name: input.name,
+        rif: input.rif,
+        seller: input.seller,
+        businessUnit: input.businessUnit,
+      })
+      .where(eq(client.code, code))
+      .returning();
+
+    if (!row) return null;
+
+    return {
+      code: row.code,
+      name: row.name,
+      rif: row.rif,
+      seller: row.seller,
+      businessUnit: row.businessUnit,
+    };
   }
 
   async ensureClients(inputs: EnsureClientInput[]): Promise<number> {

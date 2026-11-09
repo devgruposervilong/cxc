@@ -7,6 +7,7 @@ import {
   deleteDocumentFromUpload,
   deleteUploadById,
   persistUpload,
+  updateDocumentFromUpload,
 } from "../services/persist-upload";
 import type { AppEnv } from "../types";
 
@@ -62,6 +63,48 @@ app.delete("/:id", requireSession, requireAdmin, async (c) => {
   }
 
   return c.json({ deleted: true });
+});
+
+const documentChangesSchema = z.object({
+  client: z.string().trim().min(1).max(200),
+  type: z.enum(["FACT", "N/CR"]),
+  number: z.string().trim().min(1).max(100),
+  emission: z.string().trim().max(20).nullable(),
+  expiration: z.string().trim().max(20).nullable(),
+  total: z.number().nullable(),
+  seller: z.string().trim().max(200).nullable(),
+});
+
+const updateDocumentSchema = z.object({
+  originalType: z.enum(["FACT", "N/CR"]),
+  originalNumber: z.string().min(1),
+  changes: documentChangesSchema,
+});
+
+// PATCH /api/uploads/:id/documents
+app.patch("/:id/documents", requireSession, requireAdmin, async (c) => {
+  const id = c.req.param("id");
+  const parsed = updateDocumentSchema.safeParse(
+    await c.req.json().catch(() => null)
+  );
+
+  if (!id || !parsed.success) {
+    return c.json({ error: "Datos invalidos" }, 400);
+  }
+
+  const updated = await updateDocumentFromUpload(
+    c.get("db"),
+    id,
+    parsed.data.originalType,
+    parsed.data.originalNumber,
+    parsed.data.changes
+  );
+
+  if (!updated) {
+    return c.json({ error: "Documento no encontrado" }, 404);
+  }
+
+  return c.json({ updated: true });
 });
 
 const deleteDocumentSchema = z.object({

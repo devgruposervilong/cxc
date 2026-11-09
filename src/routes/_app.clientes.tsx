@@ -1,4 +1,8 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  redirect,
+  useRouteContext,
+} from "@tanstack/react-router";
 import { ClientsPage } from "@/src/components/clients-page";
 import { sessionQueryOptions } from "@/src/lib/session";
 
@@ -9,5 +13,10 @@ export const Route = createFileRoute("/_app/clientes")({
       throw redirect({ to: "/" });
     }
   },
-  component: ClientsPage,
+  component: ClientsRoute,
 });
+
+function ClientsRoute() {
+  const { me } = useRouteContext({ from: "/_app" });
+  return <ClientsPage canManage={me.user.role === "admin"} />;
+}

@@ -1,5 +1,10 @@
 import { and, asc, eq } from "drizzle-orm";
-import type { DataRow, DocumentRepository, DocumentType } from "@/lib/types";
+import type {
+  DataRow,
+  DocumentChanges,
+  DocumentRepository,
+  DocumentType,
+} from "@/lib/types";
 import type { Db } from "../db/client";
 import { document } from "../db/schema";
 import { dbRowToDataRow, domainTypeToDb } from "./mappers";
@@ -56,6 +61,35 @@ export class DrizzleDocumentRepository implements DocumentRepository {
       .orderBy(asc(document.rank));
 
     return rows.map(dbRowToDataRow);
+  }
+
+  async updateDocument(
+    uploadId: string,
+    type: DocumentType,
+    number: string,
+    changes: DocumentChanges
+  ): Promise<boolean> {
+    const rows = await this.db
+      .update(document)
+      .set({
+        client: changes.client,
+        type: domainTypeToDb(changes.type),
+        number: changes.number,
+        emission: changes.emission,
+        expiration: changes.expiration,
+        total: changes.total,
+        seller: changes.seller,
+      })
+      .where(
+        and(
+          eq(document.uploadId, uploadId),
+          eq(document.type, domainTypeToDb(type)),
+          eq(document.number, number)
+        )
+      )
+      .returning({ id: document.id });
+
+    return rows.length > 0;
   }
 
   async deleteDocument(

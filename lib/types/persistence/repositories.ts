@@ -1,4 +1,8 @@
-import type { DataRow, DocumentType } from "../application/data-row";
+import type {
+  DataRow,
+  DocumentChanges,
+  DocumentType,
+} from "../application/data-row";
 import type { Client } from "../application/client";
 import type { Seller } from "../application/seller";
 import type { UploadModel } from "./models";
@@ -18,6 +22,14 @@ export interface UploadRepository {
 export interface DocumentRepository {
   createDocuments(uploadId: string, rows: DataRow[]): Promise<void>;
   getDocumentsByUpload(uploadId: string): Promise<DataRow[]>;
+  // Identifica el documento por su tipo/numero originales para permitir
+  // corregir esos mismos campos sin perder la fila.
+  updateDocument(
+    uploadId: string,
+    type: DocumentType,
+    number: string,
+    changes: DocumentChanges
+  ): Promise<boolean>;
   deleteDocument(uploadId: string, type: DocumentType, number: string): Promise<void>;
   deleteDocumentsByUpload(uploadId: string): Promise<void>;
 }
@@ -36,6 +48,8 @@ export interface ClientRepository {
   // cuantos se insertaron. Es idempotente: guardar la misma carga dos veces
   // no duplica el maestro.
   ensureClients(clients: EnsureClientInput[]): Promise<number>;
+  // Actualiza el maestro usando el codigo actual como identificador.
+  updateClient(code: string, input: Client): Promise<Client | null>;
 }
 
 // Maestro de vendedores: keyUrl es la clave de la URL pública por vendedor.

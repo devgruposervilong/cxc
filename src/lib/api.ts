@@ -1,6 +1,7 @@
 import type {
   Client,
   DataRow,
+  DocumentChanges,
   DocumentType,
   Seller,
 } from "@/lib/types";
@@ -185,6 +186,22 @@ export function deleteUpload(id: string) {
   });
 }
 
+export type UpdateDocumentInput = {
+  originalType: DocumentType;
+  originalNumber: string;
+  changes: DocumentChanges;
+};
+
+export function updateDocumentFromUpload(
+  uploadId: string,
+  input: UpdateDocumentInput
+) {
+  return apiFetch<{ updated: boolean }>(
+    `/api/uploads/${uploadId}/documents`,
+    { method: "PATCH", body: JSON.stringify(input) }
+  );
+}
+
 export function deleteDocumentFromUpload(
   uploadId: string,
   type: DocumentType,
@@ -278,6 +295,15 @@ export function adminDeleteInvite(id: string) {
 
 export function getClients() {
   return apiFetch<ClientsCatalog>("/api/clients");
+}
+
+export type UpdateClientInput = Client;
+
+export function updateClient(code: string, input: UpdateClientInput) {
+  return apiFetch<{ client: Client }>(
+    `/api/clients/${encodeURIComponent(code)}`,
+    { method: "PATCH", body: JSON.stringify(input) }
+  );
 }
 
 export function adminRegenerateInvite(id: string) {

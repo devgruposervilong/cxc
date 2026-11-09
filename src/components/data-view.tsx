@@ -9,12 +9,13 @@ import * as XLSX from "xlsx";
 import { refreshMorosidad } from "@/lib/morosidad";
 import { rankRows } from "@/lib/ranking";
 import { formatCurrency } from "@/lib/format";
-import type { DataRow, DocumentType } from "@/lib/types";
+import type { DataRow, DocumentChanges, DocumentType } from "@/lib/types";
 import type { Me } from "@/src/lib/api";
 import {
   useDeleteDocument,
   useDeleteUpload,
   useSaveUpload,
+  useUpdateDocument,
 } from "@/src/hooks/use-uploads";
 import { usePanel } from "@/src/panel";
 import { CxcTable } from "./cxc-table";
@@ -108,6 +109,7 @@ export function DataView({
   const saveUploadMutation = useSaveUpload();
   const deleteUploadMutation = useDeleteUpload();
   const deleteDocumentMutation = useDeleteDocument();
+  const updateDocumentMutation = useUpdateDocument();
 
   const filteredRows = useMemo(() => {
     if (!selectedVendedor) return filas;
@@ -169,6 +171,42 @@ export function DataView({
     setNombreArchivo("");
     setCargadoEn(null);
     setUploadId(null);
+  }
+
+  async function updateDocument(original: DataRow, changes: DocumentChanges) {
+    setSaveStatus(null);
+    try {
+      if (uploadId) {
+        await updateDocumentMutation.mutateAsync({
+          uploadId,
+          input: {
+            originalType: original.type,
+            originalNumber: original.number,
+            changes,
+          },
+        });
+      }
+
+      setFilas(
+        refreshMorosidad(
+          filas.map((fila) =>
+            fila.type === original.type && fila.number === original.number
+              ? { ...fila, ...changes }
+              : fila
+          )
+        )
+      );
+      setSaveStatus({ text: "Documento actualizado", ok: true });
+    } catch (error) {
+      setSaveStatus({
+        text:
+          error instanceof Error
+            ? error.message
+            : "Error al actualizar el documento",
+        ok: false,
+      });
+      throw error;
+    }
   }
 
   async function deleteDocument(type: DocumentType, numero: string) {
@@ -441,6 +479,7 @@ export function DataView({
           showActions={canManage}
           showShare={canManage}
           onDelete={canManage ? deleteDocument : undefined}
+          onUpdate={canManage ? updateDocument : undefined}
         />
       </div>
     </div>
