@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { Database, LogOut, Users } from "lucide-react";
+import { DatabaseSearch, LogOut, Users } from "lucide-react";
 import type { Seller } from "@/lib/types";
 import { useSignOut } from "@/src/hooks/use-auth";
 import { useSellers } from "@/src/hooks/use-sellers";
@@ -83,7 +83,7 @@ export function DashboardShell({
                             : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
                         )}
                       >
-                        <Database className="h-4 w-4" />
+                        <DatabaseSearch className="h-4 w-4" />
                       </Link>
                     </Tooltip>
                   )}
@@ -129,7 +129,7 @@ export function DashboardShell({
                         pathname === "/tablas" && "bg-zinc-100 text-zinc-900"
                       )}
                     >
-                      <Database className="h-4 w-4 shrink-0" />
+                      <DatabaseSearch className="h-4 w-4 shrink-0" />
                       Tablas
                     </Link>
                   )}
