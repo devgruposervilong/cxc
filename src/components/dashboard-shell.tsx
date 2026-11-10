@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { Building2, LogOut, Users } from "lucide-react";
+import { Database, LogOut, Users } from "lucide-react";
 import type { Seller } from "@/lib/types";
 import { useSignOut } from "@/src/hooks/use-auth";
 import { useSellers } from "@/src/hooks/use-sellers";
@@ -27,7 +27,7 @@ export function DashboardShell({
 }) {
   const { pathname } = useLocation();
   const isSeller = me.user.role === "seller";
-  const canViewClients = !isSeller;
+  const canViewTables = !isSeller;
 
   const signOut = useSignOut();
   const sellersQuery = useSellers(!isSeller);
@@ -71,19 +71,19 @@ export function DashboardShell({
                 <div className="hidden items-center gap-1 md:flex lg:gap-1.5">
                   <HeaderActionsSlot target="desktop" />
 
-                  {canViewClients && (
-                    <Tooltip label="Clientes">
+                  {canViewTables && (
+                    <Tooltip label="Tablas">
                       <Link
-                        to="/clientes"
-                        aria-label="Clientes"
+                        to="/tablas"
+                        aria-label="Tablas"
                         className={cn(
                           iconButtonClass,
-                          pathname === "/clientes"
+                          pathname === "/tablas"
                             ? "bg-zinc-900 text-white hover:bg-zinc-900 hover:text-white"
                             : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
                         )}
                       >
-                        <Building2 className="h-4 w-4" />
+                        <Database className="h-4 w-4" />
                       </Link>
                     </Tooltip>
                   )}
@@ -119,20 +119,18 @@ export function DashboardShell({
                 </div>
 
                 <HeaderActionsMenu>
-                  {canViewClients && (
+                  {canViewTables && (
                     <Link
-                      to="/clientes"
+                      to="/tablas"
                       role="menuitem"
-                      aria-current={
-                        pathname === "/clientes" ? "page" : undefined
-                      }
+                      aria-current={pathname === "/tablas" ? "page" : undefined}
                       className={cn(
                         menuItemClass,
-                        pathname === "/clientes" && "bg-zinc-100 text-zinc-900"
+                        pathname === "/tablas" && "bg-zinc-100 text-zinc-900"
                       )}
                     >
-                      <Building2 className="h-4 w-4 shrink-0" />
-                      Clientes
+                      <Database className="h-4 w-4 shrink-0" />
+                      Tablas
                     </Link>
                   )}
 

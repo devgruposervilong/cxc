@@ -11,6 +11,21 @@ export type Seller = {
   status: SellerStatus;
 };
 
+// Fila completa del maestro para la seccion Tablas. `hasUser` evita exponer
+// el id de autenticacion y permite bloquear el borrado de vendedores ligados.
+export type SellerRecord = Seller & {
+  id: string;
+  hasUser: boolean;
+};
+
+export type SellerInput = {
+  code: string;
+  name: string;
+  surname: string | null;
+  zone: string | null;
+  status: SellerStatus;
+};
+
 export function normalizeSellerName(value: string | null): string {
   return value?.trim().toUpperCase() ?? "";
 }

@@ -22,18 +22,37 @@ function chunk<T>(items: T[], size: number): T[][] {
   return result;
 }
 
+function toClient(row: typeof client.$inferSelect): Client {
+  return {
+    code: row.code,
+    name: row.name,
+    rif: row.rif,
+    seller: row.seller,
+    businessUnit: row.businessUnit,
+  };
+}
+
 export class DrizzleClientRepository implements ClientRepository {
   constructor(private readonly db: Db) {}
 
   async getClients(): Promise<Client[]> {
     const rows = await this.db.select().from(client).orderBy(asc(client.code));
-    return rows.map((row) => ({
-      code: row.code,
-      name: row.name,
-      rif: row.rif,
-      seller: row.seller,
-      businessUnit: row.businessUnit,
-    }));
+    return rows.map(toClient);
+  }
+
+  async createClient(input: Client): Promise<Client> {
+    const [row] = await this.db
+      .insert(client)
+      .values({
+        code: input.code,
+        name: input.name,
+        rif: input.rif,
+        seller: input.seller,
+        businessUnit: input.businessUnit,
+      })
+      .returning();
+
+    return toClient(row);
   }
 
   async updateClient(code: string, input: Client): Promise<Client | null> {
@@ -49,15 +68,16 @@ export class DrizzleClientRepository implements ClientRepository {
       .where(eq(client.code, code))
       .returning();
 
-    if (!row) return null;
+    return row ? toClient(row) : null;
+  }
 
-    return {
-      code: row.code,
-      name: row.name,
-      rif: row.rif,
-      seller: row.seller,
-      businessUnit: row.businessUnit,
-    };
+  async deleteClient(code: string): Promise<boolean> {
+    const rows = await this.db
+      .delete(client)
+      .where(eq(client.code, code))
+      .returning({ id: client.id });
+
+    return rows.length > 0;
   }
 
   async ensureClients(inputs: EnsureClientInput[]): Promise<number> {

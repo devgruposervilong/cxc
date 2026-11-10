@@ -4,6 +4,7 @@ import {
   getLatestUpload,
   getSellerPortal,
   getSellers,
+  getSellersCatalog,
   getSetupStatus,
   type ClientsCatalog,
   type LoadedUpload,
@@ -33,6 +34,14 @@ export function clientsQueryOptions() {
     queryKey: queryKeys.clients.list,
     queryFn: getClients,
     staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function sellersCatalogQueryOptions() {
+  return queryOptions({
+    queryKey: queryKeys.sellers.catalog,
+    queryFn: getSellersCatalog,
+    staleTime: 60 * 1000,
   });
 }
 

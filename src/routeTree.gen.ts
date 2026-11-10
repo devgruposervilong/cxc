@@ -13,6 +13,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as PublicRouteImport } from './routes/_public'
 import { Route as AppIndexRouteImport } from './routes/_app.index'
 import { Route as AppClientesRouteImport } from './routes/_app.clientes'
+import { Route as AppTablasRouteImport } from './routes/_app.tablas'
 import { Route as PublicLoginRouteImport } from './routes/_public.login'
 import { Route as PublicSetupRouteImport } from './routes/_public.setup'
 import { Route as AppAdminUsuariosRouteImport } from './routes/_app.admin.usuarios'
@@ -35,6 +36,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const AppClientesRoute = AppClientesRouteImport.update({
   id: '/clientes',
   path: '/clientes',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTablasRoute = AppTablasRouteImport.update({
+  id: '/tablas',
+  path: '/tablas',
   getParentRoute: () => AppRoute,
 } as any)
 const PublicLoginRoute = PublicLoginRouteImport.update({
@@ -66,6 +72,7 @@ const PublicInvitacionTokenRoute = PublicInvitacionTokenRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/clientes': typeof AppClientesRoute
+  '/tablas': typeof AppTablasRoute
   '/login': typeof PublicLoginRoute
   '/setup': typeof PublicSetupRoute
   '/admin/usuarios': typeof AppAdminUsuariosRoute
@@ -75,6 +82,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
   '/clientes': typeof AppClientesRoute
+  '/tablas': typeof AppTablasRoute
   '/login': typeof PublicLoginRoute
   '/setup': typeof PublicSetupRoute
   '/admin/usuarios': typeof AppAdminUsuariosRoute
@@ -86,6 +94,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
   '/_app/clientes': typeof AppClientesRoute
+  '/_app/tablas': typeof AppTablasRoute
   '/_public/login': typeof PublicLoginRoute
   '/_public/setup': typeof PublicSetupRoute
   '/_app/': typeof AppIndexRoute
@@ -98,6 +107,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/clientes'
+    | '/tablas'
     | '/login'
     | '/setup'
     | '/admin/usuarios'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/clientes'
+    | '/tablas'
     | '/login'
     | '/setup'
     | '/admin/usuarios'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/_app'
     | '/_public'
     | '/_app/clientes'
+    | '/_app/tablas'
     | '/_public/login'
     | '/_public/setup'
     | '/_app/'
@@ -160,6 +172,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppClientesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/tablas': {
+      id: '/_app/tablas'
+      path: '/tablas'
+      fullPath: '/tablas'
+      preLoaderRoute: typeof AppTablasRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_public/login': {
       id: '/_public/login'
       path: '/login'
@@ -200,6 +219,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppClientesRoute: typeof AppClientesRoute
+  AppTablasRoute: typeof AppTablasRoute
   AppIndexRoute: typeof AppIndexRoute
   AppAdminUsuariosRoute: typeof AppAdminUsuariosRoute
   AppVendedorKeyUrlRoute: typeof AppVendedorKeyUrlRoute
@@ -207,6 +227,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppClientesRoute: AppClientesRoute,
+  AppTablasRoute: AppTablasRoute,
   AppIndexRoute: AppIndexRoute,
   AppAdminUsuariosRoute: AppAdminUsuariosRoute,
   AppVendedorKeyUrlRoute: AppVendedorKeyUrlRoute,

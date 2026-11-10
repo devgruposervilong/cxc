@@ -4,6 +4,8 @@ import type {
   DocumentChanges,
   DocumentType,
   Seller,
+  SellerInput,
+  SellerRecord,
 } from "@/lib/types";
 
 export class ApiError extends Error {
@@ -131,6 +133,10 @@ export type AdminUsersResponse = {
 export type ClientsCatalog = {
   clients: Client[];
   businessUnits: string[];
+};
+
+export type SellersCatalog = {
+  sellers: SellerRecord[];
 };
 
 export type AdminInvite = {
@@ -299,10 +305,50 @@ export function getClients() {
 
 export type UpdateClientInput = Client;
 
+export function createClient(input: Client) {
+  return apiFetch<{ client: Client }>("/api/clients", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
 export function updateClient(code: string, input: UpdateClientInput) {
   return apiFetch<{ client: Client }>(
     `/api/clients/${encodeURIComponent(code)}`,
     { method: "PATCH", body: JSON.stringify(input) }
+  );
+}
+
+export function deleteClient(code: string) {
+  return apiFetch<{ deleted: boolean }>(
+    `/api/clients/${encodeURIComponent(code)}`,
+    { method: "DELETE" }
+  );
+}
+
+export async function getSellersCatalog(): Promise<SellerRecord[]> {
+  const data = await apiFetch<SellersCatalog>("/api/sellers/catalog");
+  return data.sellers;
+}
+
+export function createSeller(input: SellerInput) {
+  return apiFetch<{ seller: SellerRecord }>("/api/sellers", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function updateSeller(id: string, input: SellerInput) {
+  return apiFetch<{ seller: SellerRecord }>(
+    `/api/sellers/${encodeURIComponent(id)}`,
+    { method: "PATCH", body: JSON.stringify(input) }
+  );
+}
+
+export function deleteSeller(id: string) {
+  return apiFetch<{ deleted: boolean }>(
+    `/api/sellers/${encodeURIComponent(id)}`,
+    { method: "DELETE" }
   );
 }
 
