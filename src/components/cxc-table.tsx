@@ -6,7 +6,7 @@ import {
   useReactTable,
   type ColumnDef,
 } from "@tanstack/react-table";
-import { Pencil, Trash2 } from "lucide-react";
+import { Lock, Pencil, Trash2 } from "lucide-react";
 import type { DataRow, DocumentChanges, DocumentType } from "@/lib/types";
 import {
   formatAmountForInput,
@@ -33,7 +33,6 @@ type DocumentDraft = {
   emission: string;
   expiration: string;
   total: string;
-  seller: string;
 };
 
 const headerClassById: Record<string, string> = {
@@ -70,11 +69,15 @@ function toDraft(row: DataRow): DocumentDraft {
     emission: row.emission ?? "",
     expiration: row.expiration ?? "",
     total: formatAmountForInput(row.total),
-    seller: row.seller ?? "",
   };
 }
 
-function toChanges(draft: DocumentDraft): DocumentChanges | null {
+// El vendedor no se edita desde CxC: se conserva el valor del documento
+// original para que la actualizacion no lo modifique.
+function toChanges(
+  draft: DocumentDraft,
+  seller: string | null
+): DocumentChanges | null {
   const total = parseAmountInput(draft.total);
   if (total.error) return null;
 
@@ -85,7 +88,7 @@ function toChanges(draft: DocumentDraft): DocumentChanges | null {
     emission: draft.emission.trim() || null,
     expiration: draft.expiration.trim() || null,
     total: total.value,
-    seller: draft.seller.trim() || null,
+    seller,
   };
 }
 
@@ -118,7 +121,7 @@ function DocumentEditModal({
       return;
     }
 
-    const changes = toChanges(draft);
+    const changes = toChanges(draft, original.seller);
     if (!changes) {
       setError("Revisa los datos del documento");
       return;
@@ -227,17 +230,23 @@ function DocumentEditModal({
           />
 
           {showSeller && (
-            <TextField
-              label="Vendedor"
-              value={draft.seller}
-              placeholder="SIN VENDEDOR"
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  seller: event.target.value,
-                }))
-              }
-            />
+            <div className="flex flex-col gap-1">
+              <span className="text-xs font-medium text-zinc-600">
+                Vendedor
+              </span>
+              <div className="flex min-h-9 items-center justify-between gap-2 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-600">
+                <span className="truncate">
+                  {original.seller?.trim() || "SIN VENDEDOR"}
+                </span>
+                <Lock
+                  className="h-3.5 w-3.5 shrink-0 text-zinc-400"
+                  aria-hidden="true"
+                />
+              </div>
+              <span className="text-[11px] text-zinc-400">
+                El vendedor se asigna desde el maestro de clientes.
+              </span>
+            </div>
           )}
         </div>
 

@@ -78,7 +78,8 @@ export class DrizzleDocumentRepository implements DocumentRepository {
         emission: changes.emission,
         expiration: changes.expiration,
         total: changes.total,
-        seller: changes.seller,
+        // El vendedor no se edita desde la tabla de CxC: se conserva el valor
+        // asignado en el documento para evitar cambios accidentales.
       })
       .where(
         and(
