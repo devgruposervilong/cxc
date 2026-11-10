@@ -3,7 +3,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { useForm } from "@tanstack/react-form";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { z } from "zod";
-import type { Client } from "@/lib/types";
+import type { Client, SellerRecord } from "@/lib/types";
 import {
   useCreateClient,
   useDeleteClient,
@@ -51,10 +51,12 @@ function toClientInput(value: ClientFormValues): Client {
 function ClientFormModal({
   client,
   businessUnits,
+  sellers,
   onClose,
 }: {
   client: Client | null;
   businessUnits: string[];
+  sellers: SellerRecord[];
   onClose: () => void;
 }) {
   const createClient = useCreateClient();
@@ -69,12 +71,21 @@ function ClientFormModal({
     [businessUnits]
   );
 
+  const sellerOptions = useMemo(() => {
+    const names = new Set(
+      sellers.map((seller) => seller.name.trim()).filter(Boolean)
+    );
+    const current = client?.seller.trim();
+    if (current && current !== "SIN VENDEDOR") names.add(current);
+    return Array.from(names).sort((a, b) => a.localeCompare(b, "es"));
+  }, [client, sellers]);
+
   const form = useForm({
     defaultValues: {
       code: client?.code ?? "",
       name: client?.name ?? "",
       rif: client?.rif ?? "",
-      seller: client?.seller ?? "",
+      seller: client?.seller.trim() || "SIN VENDEDOR",
       businessUnit: client?.businessUnit.trim() ?? "",
     } satisfies ClientFormValues,
     validators: { onSubmit: clientFormSchema },
@@ -167,19 +178,20 @@ function ClientFormModal({
         </form.Field>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          <form.Field
-            name="seller"
-            validators={{ onChange: clientFormSchema.shape.seller }}
-          >
+          <form.Field name="seller">
             {(field) => (
-              <TextField
+              <SelectField
                 label="Vendedor"
                 value={field.state.value}
                 onChange={(event) => field.handleChange(event.target.value)}
-                onBlur={field.handleBlur}
-                error={fieldErrors(field.state.meta.errors)[0]}
-                placeholder="SIN VENDEDOR"
-              />
+              >
+                <option value="SIN VENDEDOR">SIN VENDEDOR</option>
+                {sellerOptions.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </SelectField>
             )}
           </form.Field>
 
@@ -228,6 +240,7 @@ function ClientFormModal({
 export function ClientsTable({
   clients,
   businessUnits,
+  sellers,
   canManage,
   isPending,
   isError,
@@ -236,6 +249,7 @@ export function ClientsTable({
 }: {
   clients: Client[];
   businessUnits: string[];
+  sellers: SellerRecord[];
   canManage: boolean;
   isPending: boolean;
   isError: boolean;
@@ -448,6 +462,7 @@ export function ClientsTable({
         <ClientFormModal
           client={formTarget.client}
           businessUnits={businessUnits}
+          sellers={sellers}
           onClose={() => setFormTarget(null)}
         />
       )}

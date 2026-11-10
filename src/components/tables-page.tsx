@@ -101,6 +101,7 @@ export function TablesPage({ canManage }: { canManage: boolean }) {
           <ClientsTable
             clients={clients}
             businessUnits={businessUnits}
+            sellers={sellers}
             canManage={canManage}
             isPending={clientsQuery.isPending}
             isError={clientsQuery.isError}

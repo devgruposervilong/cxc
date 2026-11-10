@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useMemo, useState, type FormEvent } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -6,11 +6,15 @@ import {
   useReactTable,
   type ColumnDef,
 } from "@tanstack/react-table";
-import { Check, Loader2, Pencil, Trash2, X } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import type { DataRow, DocumentChanges, DocumentType } from "@/lib/types";
-import { formatAmountForInput, formatCurrency, parseAmountInput } from "@/lib/format";
+import {
+  formatAmountForInput,
+  formatCurrency,
+  parseAmountInput,
+} from "@/lib/format";
+import { Alert, Button, Modal, SelectField, TextField } from "./ui";
 import { WhatsAppShareButton } from "./whatsapp-share-button";
-import { cn } from "./ui";
 
 type CxcTableProps = {
   rows: DataRow[];
@@ -58,17 +62,6 @@ const cellClassById: Record<string, string> = {
   actions: "px-4 py-2",
 };
 
-const inputClass =
-  "w-full min-w-[6rem] rounded border border-zinc-300 bg-white px-1.5 py-1 text-base text-zinc-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 lg:text-xs";
-
-function documentKey(type: DocumentType, number: string): string {
-  return `${type}\u0000${number}`;
-}
-
-function rowKey(row: DataRow): string {
-  return documentKey(row.type, row.number);
-}
-
 function toDraft(row: DataRow): DocumentDraft {
   return {
     client: row.client ?? "",
@@ -96,6 +89,178 @@ function toChanges(draft: DocumentDraft): DocumentChanges | null {
   };
 }
 
+function DocumentEditModal({
+  original,
+  showSeller,
+  onSave,
+  onClose,
+}: {
+  original: DataRow;
+  showSeller: boolean;
+  onSave: (changes: DocumentChanges) => Promise<void>;
+  onClose: () => void;
+}) {
+  const [draft, setDraft] = useState<DocumentDraft>(() => toDraft(original));
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const total = parseAmountInput(draft.total);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!draft.number.trim()) {
+      setError("El numero del documento es obligatorio");
+      return;
+    }
+    if (total.error) {
+      setError(total.error);
+      return;
+    }
+
+    const changes = toChanges(draft);
+    if (!changes) {
+      setError("Revisa los datos del documento");
+      return;
+    }
+
+    setSaving(true);
+    setError(null);
+    try {
+      await onSave(changes);
+      onClose();
+    } catch (saveError) {
+      setError(
+        saveError instanceof Error
+          ? saveError.message
+          : "No se pudo actualizar el documento"
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Modal
+      title="Editar documento"
+      description={`${original.type} ${original.number} · ${original.client ?? "SIN CLIENTE"}`}
+      onClose={onClose}
+      className="max-w-2xl"
+    >
+      <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
+        <TextField
+          label="Cliente"
+          value={draft.client}
+          onChange={(event) =>
+            setDraft((current) => ({ ...current, client: event.target.value }))
+          }
+          autoFocus
+        />
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <SelectField
+            label="Tipo"
+            value={draft.type}
+            onChange={(event) =>
+              setDraft((current) => ({
+                ...current,
+                type: event.target.value as DocumentType,
+              }))
+            }
+          >
+            <option value="FACT">FACT</option>
+            <option value="N/CR">N/CR</option>
+          </SelectField>
+
+          <TextField
+            label="Numero"
+            value={draft.number}
+            onChange={(event) =>
+              setDraft((current) => ({ ...current, number: event.target.value }))
+            }
+          />
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <TextField
+            label="Emision"
+            value={draft.emission}
+            placeholder="DD/MM/AAAA"
+            onChange={(event) =>
+              setDraft((current) => ({
+                ...current,
+                emission: event.target.value,
+              }))
+            }
+          />
+
+          <TextField
+            label="Vencimiento"
+            value={draft.expiration}
+            placeholder="DD/MM/AAAA"
+            onChange={(event) =>
+              setDraft((current) => ({
+                ...current,
+                expiration: event.target.value,
+              }))
+            }
+          />
+        </div>
+
+        <div
+          className={
+            showSeller ? "grid gap-3 sm:grid-cols-2" : "grid gap-3"
+          }
+        >
+          <TextField
+            label="Total"
+            type="text"
+            inputMode="decimal"
+            autoComplete="off"
+            value={draft.total}
+            placeholder="0,00"
+            aria-invalid={total.error !== null}
+            error={total.error ?? undefined}
+            onChange={(event) =>
+              setDraft((current) => ({ ...current, total: event.target.value }))
+            }
+          />
+
+          {showSeller && (
+            <TextField
+              label="Vendedor"
+              value={draft.seller}
+              placeholder="SIN VENDEDOR"
+              onChange={(event) =>
+                setDraft((current) => ({
+                  ...current,
+                  seller: event.target.value,
+                }))
+              }
+            />
+          )}
+        </div>
+
+        {error && <Alert tone="error">{error}</Alert>}
+
+        <div className="mt-2 flex justify-end gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onClose}
+            disabled={saving}
+          >
+            Cancelar
+          </Button>
+          <Button type="submit" disabled={saving}>
+            {saving ? "Guardando..." : "Guardar cambios"}
+          </Button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
 export function CxcTable({
   rows,
   showSeller = true,
@@ -105,124 +270,16 @@ export function CxcTable({
   onUpdate,
   emptyMessage = "No hay cuentas por cobrar para mostrar.",
 }: CxcTableProps) {
-  const [editingKey, setEditingKey] = useState<string | null>(null);
-  const [draft, setDraft] = useState<DocumentDraft | null>(null);
-  const [savingKey, setSavingKey] = useState<string | null>(null);
+  const [editingTarget, setEditingTarget] = useState<DataRow | null>(null);
 
   const columns = useMemo<ColumnDef<DataRow>[]>(() => {
-    const isEditing = (row: DataRow) => editingKey === rowKey(row);
-
     const defs: ColumnDef<DataRow>[] = [
       { accessorKey: "rank", header: "RANGO" },
-      {
-        accessorKey: "client",
-        header: "CLIENTE",
-        cell: ({ row }) =>
-          isEditing(row.original) ? (
-            <input
-              value={draft?.client ?? ""}
-              onChange={(event) =>
-                setDraft((current) =>
-                  current ? { ...current, client: event.target.value } : current
-                )
-              }
-              aria-label="Cliente"
-              className={inputClass}
-            />
-          ) : (
-            row.original.client
-          ),
-      },
-      {
-        accessorKey: "type",
-        header: "TIPO",
-        cell: ({ row }) =>
-          isEditing(row.original) ? (
-            <select
-              value={draft?.type ?? "FACT"}
-              onChange={(event) =>
-                setDraft((current) =>
-                  current
-                    ? {
-                        ...current,
-                        type: event.target.value as DocumentType,
-                      }
-                    : current
-                )
-              }
-              aria-label="Tipo de documento"
-              className={inputClass}
-            >
-              <option value="FACT">FACT</option>
-              <option value="N/CR">N/CR</option>
-            </select>
-          ) : (
-            row.original.type
-          ),
-      },
-      {
-        accessorKey: "number",
-        header: "NUMERO",
-        cell: ({ row }) =>
-          isEditing(row.original) ? (
-            <input
-              value={draft?.number ?? ""}
-              onChange={(event) =>
-                setDraft((current) =>
-                  current ? { ...current, number: event.target.value } : current
-                )
-              }
-              aria-label="Numero de documento"
-              className={inputClass}
-            />
-          ) : (
-            row.original.number
-          ),
-      },
-      {
-        accessorKey: "emission",
-        header: "EMISION",
-        cell: ({ row }) =>
-          isEditing(row.original) ? (
-            <input
-              value={draft?.emission ?? ""}
-              onChange={(event) =>
-                setDraft((current) =>
-                  current
-                    ? { ...current, emission: event.target.value }
-                    : current
-                )
-              }
-              placeholder="DD/MM/AAAA"
-              aria-label="Fecha de emision"
-              className={inputClass}
-            />
-          ) : (
-            row.original.emission
-          ),
-      },
-      {
-        accessorKey: "expiration",
-        header: "VENCIMIENTO",
-        cell: ({ row }) =>
-          isEditing(row.original) ? (
-            <input
-              value={draft?.expiration ?? ""}
-              onChange={(event) =>
-                setDraft((current) =>
-                  current
-                    ? { ...current, expiration: event.target.value }
-                    : current
-                )
-              }
-              placeholder="DD/MM/AAAA"
-              aria-label="Fecha de vencimiento"
-              className={inputClass}
-            />
-          ) : (
-            row.original.expiration
-          ),
-      },
+      { accessorKey: "client", header: "CLIENTE" },
+      { accessorKey: "type", header: "TIPO" },
+      { accessorKey: "number", header: "NUMERO" },
+      { accessorKey: "emission", header: "EMISION" },
+      { accessorKey: "expiration", header: "VENCIMIENTO" },
       {
         accessorKey: "overdueDays",
         header: "MOROSIDAD (DIAS)",
@@ -241,165 +298,52 @@ export function CxcTable({
       defs.push({
         accessorKey: "seller",
         header: "VENDEDOR",
-        cell: ({ row }) =>
-          isEditing(row.original) ? (
-            <input
-              value={draft?.seller ?? ""}
-              onChange={(event) =>
-                setDraft((current) =>
-                  current ? { ...current, seller: event.target.value } : current
-                )
-              }
-              aria-label="Vendedor"
-              className={inputClass}
-            />
-          ) : (
-            row.original.seller
-          ),
       });
     }
 
     defs.push({
       accessorKey: "total",
       header: "TOTAL",
-      cell: ({ row }) => {
-        if (!isEditing(row.original)) {
-          return formatCurrency(Number(row.original.total ?? 0));
-        }
-
-        const amount = parseAmountInput(draft?.total ?? "");
-
-        return (
-          <div className="min-w-[7rem]">
-            <input
-              type="text"
-              inputMode="decimal"
-              autoComplete="off"
-              value={draft?.total ?? ""}
-              onChange={(event) =>
-                setDraft((current) =>
-                  current ? { ...current, total: event.target.value } : current
-                )
-              }
-              placeholder="0,00"
-              aria-label="Total"
-              aria-invalid={amount.error !== null}
-              className={cn(
-                inputClass,
-                "min-w-[5rem] text-right",
-                amount.error &&
-                  "border-red-400 focus:border-red-500 focus:ring-red-500"
-              )}
-            />
-            {amount.error && (
-              <p className="mt-1 text-left text-[10px] font-medium leading-tight text-red-600">
-                {amount.error}
-              </p>
-            )}
-          </div>
-        );
-      },
+      cell: ({ row }) => formatCurrency(Number(row.original.total ?? 0)),
     });
 
     if (showActions) {
       defs.push({
         id: "actions",
         header: "ACCIONES",
-        cell: ({ row }) => {
-          if (isEditing(row.original)) {
-            const saving = savingKey === rowKey(row.original);
-            const canSave =
-              Boolean(draft?.number.trim()) &&
-              parseAmountInput(draft?.total ?? "").error === null;
-
-            return (
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={async () => {
-                    if (!draft || !onUpdate) return;
-                    const changes = toChanges(draft);
-                    if (!changes) return;
-
-                    const key = rowKey(row.original);
-                    setSavingKey(key);
-                    try {
-                      await onUpdate(row.original, changes);
-                      setEditingKey(null);
-                      setDraft(null);
-                    } finally {
-                      setSavingKey(null);
-                    }
-                  }}
-                  disabled={savingKey !== null || !canSave}
-                  className="cursor-pointer rounded p-1 text-emerald-600 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
-                  aria-label="Guardar cambios"
-                  title={
-                    canSave
-                      ? "Guardar cambios"
-                      : "Completa el numero y usa un total valido"
-                  }
-                >
-                  {saving ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Check className="h-4 w-4" />
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingKey(null);
-                    setDraft(null);
-                  }}
-                  disabled={savingKey !== null}
-                  className="cursor-pointer rounded p-1 text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700 disabled:cursor-not-allowed disabled:opacity-50"
-                  aria-label="Cancelar edicion"
-                  title="Cancelar edicion"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            );
-          }
-
-          return (
-            <div className="flex items-center gap-1">
-              {onUpdate && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingKey(rowKey(row.original));
-                    setDraft(toDraft(row.original));
-                  }}
-                  className="cursor-pointer rounded p-1 text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700"
-                  aria-label="Editar documento"
-                  title="Editar documento"
-                >
-                  <Pencil className="h-4 w-4" />
-                </button>
-              )}
-              {onDelete && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    onDelete(row.original.type, row.original.number)
-                  }
-                  className="cursor-pointer rounded p-1 text-zinc-400 transition hover:bg-red-50 hover:text-red-600"
-                  aria-label="Eliminar documento"
-                  title="Eliminar documento"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-          );
-        },
+        cell: ({ row }) => (
+          <div className="flex items-center gap-1">
+            {onUpdate && (
+              <button
+                type="button"
+                onClick={() => setEditingTarget(row.original)}
+                className="cursor-pointer rounded p-1 text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700"
+                aria-label="Editar documento"
+                title="Editar documento"
+              >
+                <Pencil className="h-4 w-4" />
+              </button>
+            )}
+            {onDelete && (
+              <button
+                type="button"
+                onClick={() =>
+                  onDelete(row.original.type, row.original.number)
+                }
+                className="cursor-pointer rounded p-1 text-zinc-400 transition hover:bg-red-50 hover:text-red-600"
+                aria-label="Eliminar documento"
+                title="Eliminar documento"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+        ),
       });
     }
 
     return defs;
-  }, [draft, editingKey, onDelete, onUpdate, savingKey, showActions, showSeller]);
+  }, [onDelete, onUpdate, showActions, showSeller]);
 
   const tableState = useMemo(() => ({ grouping: ["client"] }), []);
 
@@ -426,82 +370,93 @@ export function CxcTable({
   }
 
   return (
-    <table className="w-full text-left text-sm">
-      <thead className="sticky top-0 z-10 bg-zinc-900 text-white">
-        <tr className="border-b border-zinc-700">
-          {table.getHeaderGroups()[0]?.headers.map((header) => (
-            <th
-              key={header.id}
-              className={headerClassById[header.column.id] ?? "px-4 py-3"}
-            >
-              {flexRender(
-                header.column.columnDef.header,
-                header.getContext()
-              )}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {groupedRows.map((row) => {
-          const docs = row.subRows ?? [];
-          const subtotal = docs.reduce(
-            (sum, subRow) => sum + (subRow.original.total ?? 0),
-            0
-          );
+    <>
+      <table className="w-full text-left text-sm">
+        <thead className="sticky top-0 z-10 bg-zinc-900 text-white">
+          <tr className="border-b border-zinc-700">
+            {table.getHeaderGroups()[0]?.headers.map((header) => (
+              <th
+                key={header.id}
+                className={headerClassById[header.column.id] ?? "px-4 py-3"}
+              >
+                {flexRender(
+                  header.column.columnDef.header,
+                  header.getContext()
+                )}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {groupedRows.map((row) => {
+            const docs = row.subRows ?? [];
+            const subtotal = docs.reduce(
+              (sum, subRow) => sum + (subRow.original.total ?? 0),
+              0
+            );
 
-          return (
-            <Fragment key={row.id}>
-              {docs.map((subRow) => (
-                <tr
-                  key={subRow.id}
-                  className="border-b border-zinc-100 hover:bg-zinc-50"
-                >
-                  {subRow.getVisibleCells().map((cell) => (
-                    <td
-                      key={cell.id}
-                      className={cellClassById[cell.column.id] ?? "px-4 py-2"}
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
+            return (
+              <Fragment key={row.id}>
+                {docs.map((subRow) => (
+                  <tr
+                    key={subRow.id}
+                    className="border-b border-zinc-100 hover:bg-zinc-50"
+                  >
+                    {subRow.getVisibleCells().map((cell) => (
+                      <td
+                        key={cell.id}
+                        className={cellClassById[cell.column.id] ?? "px-4 py-2"}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+                <tr className="border-b border-zinc-200 bg-zinc-100 font-bold">
+                  <td
+                    colSpan={leadingCols}
+                    className="px-4 py-2 text-right text-zinc-700"
+                  >
+                    Subtotal {String(row.groupingValue ?? "SIN CLIENTE")}
+                  </td>
+                  <td className="px-4 py-2 text-right font-bold text-zinc-900">
+                    {formatCurrency(subtotal)}
+                  </td>
+                  {showActions && (
+                    <td className="px-4 py-2">
+                      {showShare && (
+                        <WhatsAppShareButton
+                          client={String(row.groupingValue ?? "SIN CLIENTE")}
+                          docs={docs.map((subRow) => subRow.original)}
+                          subtotal={subtotal}
+                        />
                       )}
                     </td>
-                  ))}
+                  )}
                 </tr>
-              ))}
-              <tr className="border-b border-zinc-200 bg-zinc-100 font-bold">
-                <td
-                  colSpan={leadingCols}
-                  className="px-4 py-2 text-right text-zinc-700"
-                >
-                  Subtotal {String(row.groupingValue ?? "SIN CLIENTE")}
-                </td>
-                <td className="px-4 py-2 text-right font-bold text-zinc-900">
-                  {formatCurrency(subtotal)}
-                </td>
-                {showActions && (
-                  <td className="px-4 py-2">
-                    {showShare && (
-                      <WhatsAppShareButton
-                        client={String(row.groupingValue ?? "SIN CLIENTE")}
-                        docs={docs.map((subRow) => subRow.original)}
-                        subtotal={subtotal}
-                      />
-                    )}
-                  </td>
-                )}
-              </tr>
-            </Fragment>
-          );
-        })}
-        <tr className="bg-zinc-900 font-semibold text-white">
-          <td colSpan={totalCols - 1} className="px-4 py-3 text-right">
-            TOTAL
-          </td>
-          <td className="px-4 py-3 text-right">{formatCurrency(grandTotal)}</td>
-        </tr>
-      </tbody>
-    </table>
+              </Fragment>
+            );
+          })}
+          <tr className="bg-zinc-900 font-semibold text-white">
+            <td colSpan={totalCols - 1} className="px-4 py-3 text-right">
+              TOTAL
+            </td>
+            <td className="px-4 py-3 text-right">{formatCurrency(grandTotal)}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      {editingTarget && onUpdate && (
+        <DocumentEditModal
+          original={editingTarget}
+          showSeller={showSeller}
+          onSave={(changes) => onUpdate(editingTarget, changes)}
+          onClose={() => setEditingTarget(null)}
+        />
+      )}
+    </>
   );
 }
